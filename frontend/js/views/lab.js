@@ -38,7 +38,7 @@ export async function render(root) {
       </div>
     </div>
 
-    <div class="card lab-stage" data-stage>
+    <div class="board lab-stage" data-stage>
       <div class="stage-overlay">
         <span class="chip" data-rotinfo>|ψ⟩ = |0⟩ · the north pole</span>
         <div class="row" style="gap:6px">

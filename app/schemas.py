@@ -32,6 +32,14 @@ class QasmImportRequest(BaseModel):
     qasm: str
 
 
+class LabContext(BaseModel):
+    """What the learner is looking at in a visual lab (facts computed by the backend engines)."""
+
+    lab: str = Field(..., max_length=40)
+    title: str = Field("", max_length=120)
+    facts: list[str] = Field(default_factory=list, max_length=30)
+
+
 class TutorRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=4000)
     circuit: Circuit | None = None
@@ -40,6 +48,8 @@ class TutorRequest(BaseModel):
     lesson_id: str | None = None
     challenge_id: str | None = None
     user_id: int | None = None
+    course: str | None = None
+    lab: LabContext | None = None
 
 
 class UserCreate(BaseModel):
@@ -74,6 +84,7 @@ class ClassroomCreate(BaseModel):
 
 class AssignmentCreate(BaseModel):
     title: str = Field(..., min_length=1, max_length=160)
+    course: str = "quantum"
     item_type: Literal["lesson", "challenge"]
     item_id: str
     due: str | None = None

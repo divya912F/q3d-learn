@@ -45,6 +45,19 @@ const ICONS = {
   plus: '<path d="M12 5v14M5 12h14"/>',
   clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>',
   dice: '<rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/><circle cx="16" cy="16" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/>',
+  brain: '<path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 6 1V5a2 2 0 0 0-3-1z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-6 1"/><path d="M9 9h1M14 9h1M9 14h1M14 14h1"/>',
+  trend: '<path d="M3 20h18"/><path d="M4 16l5-6 4 3 7-8"/><path d="M15 5h5v5"/>',
+  grid: '<rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/>',
+  table: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M3 14h18M9 4v16"/>',
+  route: '<circle cx="6" cy="19" r="2.5"/><circle cx="18" cy="5" r="2.5"/><path d="M8.5 19H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.5"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  moon: '<path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/>',
+  pencil: '<path d="M4 20l4-1 11-11-3-3L5 16z"/><path d="M14 6l3 3"/>',
+  notebook: '<rect x="5" y="3" width="15" height="18" rx="2"/><path d="M5 7H3M5 12H3M5 17H3M9 3v18"/>',
+  shuffle: '<path d="M3 6h4l10 12h4M3 18h4l3-3.6M14 9.6 17 6h4"/><path d="M19 4l2 2-2 2M19 16l2 2-2 2"/>',
+  pause: '<rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/><rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>',
+  step: '<path d="M5 4l10 8-10 8z" fill="currentColor"/><rect x="17" y="4" width="3" height="16" rx="1" fill="currentColor"/>',
   github: '<path d="M9 19c-4 1.5-4-2-6-2.5M15 22v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12 12 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V22"/>',
 };
 
@@ -124,15 +137,23 @@ export function markdown(src) {
 
 /* ------------------------------------------------------------------ maths */
 const TEX_MAP = [
+  [/\\\{/g, '⦃'], [/\\\}/g, '⦄'], [/\\in\b/g, '∈'], [/\\tanh/g, 'tanh'], [/\\min/g, 'min'],
   [/\\begin\{pmatrix\}(.*?)\\end\{pmatrix\}/g, (_, b) => '[' + b.split('\\\\').map((r) => r.split('&').map((x) => x.trim()).join(' ')).join(' ; ') + ']'],
-  [/\^\{\\otimes n\}/g, '⊗ⁿ'], [/\\sqrt\{(\w+)\}|\\sqrt(\w)/g, (_, a, b) => `√${a || b}`], [/\\psi/g, 'ψ'], [/\\varphi|\\phi/g, 'φ'], [/\\theta/g, 'θ'], [/\\alpha/g, 'α'], [/\\beta/g, 'β'],
-  [/\\pi/g, 'π'], [/\\rangle/g, '⟩'], [/\\langle/g, '⟨'], [/\\otimes/g, '⊗'], [/\\qquad|\\quad/g, '   '], [/\\,/g, ' '],
-  [/\\mathrm\{([^}]*)\}/g, '$1'], [/\\big|\\Big/g, ''], [/\^2/g, '²'], [/\^\{([^}]*)\}/g, '^($1)'],
+  [/\\begin\{cases\}(.*?)\\end\{cases\}/g, (_, b) => '{ ' + b.split('\\\\').map((r) => r.replace(/&/g, ' ')).join(' ; ') + ' }'],
+  [/\\text\{([^}]*)\}|\\mathrm\{([^}]*)\}/g, (_, a, b) => a ?? b],
+  [/\\xrightarrow\{([^}]*)\}/g, ' —$1→ '],
+  [/\\hat\{(\w)\}/g, '$1̂'], [/\\bar\{(\w+)\}/g, '$1̄'], [/\\mathcal\{N\}/g, '𝒩'],
+  [/\^\{\\otimes n\}/g, '⊗ⁿ'], [/\\sqrt\{(\w+)\}|\\sqrt(\w)/g, (_, a, b) => `√${a || b}`],
+  [/\\psi/g, 'ψ'], [/\\varphi|\\phi/g, 'φ'], [/\\theta/g, 'θ'], [/\\alpha/g, 'α'], [/\\beta/g, 'β'], [/\\gamma/g, 'γ'], [/\\eta/g, 'η'],
+  [/\\sigma/g, 'σ'], [/\\mu/g, 'μ'], [/\\lambda/g, 'λ'], [/\\partial\s*/g, '∂'], [/\\sum_\{?(\w)\}?/g, 'Σ_$1 '], [/\\sum/g, 'Σ'], [/\\max_\{?([^}\s]+)\}?/g, 'max_$1 '],
+  [/\\max/g, 'max'], [/\\pi/g, 'π'], [/\\rangle/g, '⟩'], [/\\langle/g, '⟨'], [/\\otimes/g, '⊗'], [/\\leftarrow/g, '←'], [/\\Rightarrow/g, '⇒'],
+  [/\\rightarrow/g, '→'], [/\\cdot/g, '·'], [/\\approx/g, '≈'], [/\\mid/g, '|'], [/\\lVert|\\rVert/g, '‖'], [/\\left|\\right/g, ''],
+  [/\\qquad|\\quad/g, '   '], [/\\[,;!]|\\ /g, ' '], [/\\big|\\Big/g, ''], [/\^2/g, '²'], [/\^\{([^}]*)\}/g, '^($1)'],
   [/\\t?frac\{([^}]*)\}\{([^}]*)\}/g, (_, a, b) => `(${wrap(a)}/${wrap(b)})`],
-  [/[{}]/g, ''], [/\\cos/g, 'cos'], [/\\sin/g, 'sin'],
+  [/[{}]/g, ''], [/\\cos/g, 'cos'], [/\\sin/g, 'sin'], [/\\[a-zA-Z]+/g, ''], [/⦃/g, '{'], [/⦄/g, '}'],
 ];
 
-const wrap = (x) => (/^[\w√ψφθαβπ]+$/u.test(x.trim()) ? x.trim() : `(${x.trim()})`);
+const wrap = (x) => (/^[\w√ψφθαβπσμη∂\u0302\u0304]+$/u.test(x.trim()) ? x.trim() : `(${x.trim()})`);
 
 export function renderTex(target, tex) {
   if (window.katex) {
@@ -187,9 +208,16 @@ export function phaseColor(phase, light = 62) {
 }
 
 export const GATE_COLORS = {
-  superposition: '#4f8cff', pauli: '#9b7bff', phase: '#2dd4f0', rotation: '#fbbf24',
-  entangle: '#f472b6', multi: '#34d399', measure: '#94a3b8', basic: '#64748b', meta: '#475569',
+  superposition: '#3b5bdb', pauli: '#7048e8', phase: '#1098ad', rotation: '#e67700',
+  entangle: '#d6336c', multi: '#0ca678', measure: '#64748b', basic: '#64748b', meta: '#475569',
 };
+
+/** Colours for class labels / series in plots (work on paper and in dark mode). */
+export const CLASS_COLORS = ['#3b5bdb', '#e8590c', '#0ca678', '#d6336c', '#7048e8', '#1098ad', '#e67700', '#495057', '#5c940d', '#ae3ec9'];
+
+export function cssVar(name, el = document.documentElement) {
+  return getComputedStyle(el).getPropertyValue(name).trim();
+}
 
 export function gateColor(spec) {
   return GATE_COLORS[spec?.category] || '#4f8cff';

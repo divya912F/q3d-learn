@@ -203,7 +203,7 @@ export class ResultsPanel {
     if (this.tab === 'bloch') {
       const bl = s ? s.bloch : r.bloch;
       body.innerHTML = `<p class="muted small">Each qubit's reduced state. Arrows shorter than the radius are <b>mixed</b> — a tell-tale sign of entanglement with the other qubits. Drag to orbit.</p>
-        <div class="bloch-grid">${bl.map((b) => `<div class="bloch-tile" data-q="${b.qubit}"><span class="qname">q${b.qubit}</span>${b.r < 0.99 ? '<span class="chip pink">mixed</span>' : ''}<div class="canvas-holder"></div>
+        <div class="bloch-grid">${bl.map((b) => `<div class="bloch-tile board" data-q="${b.qubit}"><span class="qname">q${b.qubit}</span>${b.r < 0.99 ? '<span class="chip pink">mixed</span>' : ''}<div class="canvas-holder"></div>
           <div class="meta"><span>(${b.x.toFixed(2)}, ${b.y.toFixed(2)}, ${b.z.toFixed(2)})</span><span title="Purity Tr(ρ²)">P=${b.purity.toFixed(2)}</span></div></div>`).join('')}</div>`;
       this.spheres = bl.map((b) => {
         const holder = body.querySelector(`[data-q="${b.qubit}"] .canvas-holder`);
@@ -215,7 +215,7 @@ export class ResultsPanel {
 
     if (this.tab === 'qsphere') {
       const amps = s ? s.amplitudes : r.statevector.map((x) => [x.re, x.im]);
-      body.innerHTML = `<p class="muted small">Q-Sphere: basis states sit at a latitude set by how many 1s they contain; node size = probability, colour = phase. Great for spotting entanglement and interference patterns.</p><div class="qsphere-holder"></div>`;
+      body.innerHTML = `<p class="muted small">Q-Sphere: basis states sit at a latitude set by how many 1s they contain; node size = probability, colour = phase. Great for spotting entanglement and interference patterns.</p><div class="qsphere-holder board"></div>`;
       this.qsphere = new QSphere(body.querySelector('.qsphere-holder'));
       this.qsphere.setAmplitudes(amps, n);
     }

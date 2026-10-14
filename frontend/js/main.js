@@ -1,25 +1,19 @@
-// App shell: routing, sidebar, profile, AI drawer, backend status.
+// App shell: routing, course-aware sidebar, theme, profile, AI drawer, backend status.
 import { api } from './api.js';
 import { store } from './store.js';
 import { $, $$, esc, hydrateIcons, initials, toast, icon } from './ui.js';
 import { Chat } from './components/chat.js';
 
-const ROUTES = {
-  home: { title: 'Home', load: () => import('./views/home.js') },
-  learn: { title: 'Lessons', load: () => import('./views/learn.js') },
-  lab: { title: '3D Lab — Bloch Sphere', load: () => import('./views/lab.js') },
-  builder: { title: 'Circuit Builder', load: () => import('./views/builder.js') },
-  algorithms: { title: 'Algorithm Library', load: () => import('./views/algorithms.js') },
-  challenges: { title: 'Challenges', load: () => import('./views/challenges.js') },
-  tutor: { title: 'AI Tutor', load: () => import('./views/tutor.js') },
-  progress: { title: 'My Progress', load: () => import('./views/progress.js') },
-  instructor: { title: 'Instructor Dashboard', load: () => import('./views/instructor.js') },
-  about: { title: 'About the Project', load: () => import('./views/about.js') },
+const QUANTUM_LABS = {
+  bloch: () => import('./views/lab.js'),
+  builder: () => import('./views/builder.js'),
+  algorithms: () => import('./views/algorithms.js'),
 };
 
 let cleanup = null;
 let drawerChat = null;
 let navToken = 0;
+let progressCache = null;
 
 export function navigate(path) {
   if (location.hash === `#${path}`) route();
@@ -29,21 +23,70 @@ export function navigate(path) {
 export function parseHash() {
   const raw = location.hash.replace(/^#\/?/, '');
   const [pathPart, query = ''] = raw.split('?');
-  const parts = pathPart.split('/').filter(Boolean);
-  return { name: parts[0] || 'home', params: parts.slice(1), query: new URLSearchParams(query) };
+  const parts = pathPart.split('/').filter(Boolean).map(decodeURIComponent);
+  return { parts, query: new URLSearchParams(query) };
+}
+
+/** Resolve the current hash into {key, title, course, load, params}. */
+function resolve() {
+  const { parts, query } = parseHash();
+  const legacy = { learn: 'learn', lab: 'lab/bloch', builder: 'lab/builder', algorithms: 'lab/algorithms', challenges: 'challenges' };
+  if (legacy[parts[0]]) {
+    const rest = parts.slice(1).join('/');
+    location.replace(`#/c/quantum/${legacy[parts[0]]}${rest ? `/${rest}` : ''}${query.toString() ? `?${query}` : ''}`);
+    return null;
+  }
+  if (parts[0] === 'c' && parts[1]) {
+    const course = parts[1];
+    const section = parts[2] || 'overview';
+    const base = { course, query };
+    if (section === 'overview') return { ...base, key: 'overview', title: 'Overview', load: () => import('./views/course.js'), params: [] };
+    if (section === 'learn') return { ...base, key: 'learn', title: 'Lessons', load: () => import('./views/learn.js'), params: parts.slice(3) };
+    if (section === 'challenges') return { ...base, key: 'challenges', title: 'Challenges', load: () => import('./views/challenges.js'), params: parts.slice(3) };
+    if (section === 'lab' && parts[3]) {
+      const lab = parts[3];
+      if (course === 'quantum' && QUANTUM_LABS[lab]) {
+        const titles = { bloch: '3D Bloch Lab', builder: 'Circuit Builder', algorithms: 'Algorithm Library' };
+        return { ...base, key: `lab:${lab}`, title: titles[lab], load: QUANTUM_LABS[lab], params: parts.slice(4) };
+      }
+      return { ...base, key: `lab:${lab}`, title: 'Lab', load: () => import('./views/labview.js'), params: [lab] };
+    }
+  }
+  const simple = {
+    tutor: ['AI Tutor', () => import('./views/tutor.js')],
+    progress: ['My Progress', () => import('./views/progress.js')],
+    instructor: ['Instructor Dashboard', () => import('./views/instructor.js')],
+    about: ['About the Project', () => import('./views/about.js')],
+  };
+  if (simple[parts[0]]) return { key: parts[0], title: simple[parts[0]][0], load: simple[parts[0]][1], params: parts.slice(1), query, course: null };
+  return { key: 'home', title: 'Study desk', load: () => import('./views/home.js'), params: [], query, course: null };
+}
+
+function applyCourse(cid) {
+  const meta = store.courseMeta(cid);
+  document.documentElement.style.setProperty('--course', meta ? `var(--c-${cid})` : 'var(--primary)');
 }
 
 async function route() {
   const token = ++navToken;
-  const { name, params, query } = parseHash();
-  const r = ROUTES[name] || ROUTES.home;
-  const key = ROUTES[name] ? name : 'home';
-  $$('#nav a').forEach((a) => a.classList.toggle('active', a.dataset.route === key));
-  $('#page-title').textContent = r.title;
-  document.title = `${r.title} · Q-3D Learn`;
+  const r = resolve();
+  if (!r) return;
+  if (r.course && !store.courseMeta(r.course)) { navigate('/'); return; }
+  if (r.course) store.set('course', r.course);
+  store.currentCourse = r.course || null;
+  applyCourse(r.course);
+  store.labContext = null;
+  if (r.key !== 'challenges') store.context.challenge_id = null;
+  if (r.key !== 'learn') store.context.lesson_id = null;
+  renderNav(r);
+  const meta = store.courseMeta(r.course);
+  const labMeta = meta?.labs.find((l) => `lab:${l.id}` === r.key);
+  const title = labMeta ? labMeta.title : r.title;
+  $('#page-title').innerHTML = meta
+    ? `<span class="crumb"><a href="#/c/${meta.id}">${esc(meta.title)}</a></span><span class="sep">›</span><span class="here">${esc(title)}</span>`
+    : `<span class="here">${esc(r.title)}</span>`;
+  document.title = `${title}${meta ? ` · ${meta.short}` : ''} · Q-3D Learn`;
   $('#sidebar').classList.remove('open');
-  if (key !== 'challenges') store.context.challenge_id = null;
-  if (key !== 'learn') store.context.lesson_id = null;
   try { cleanup?.(); } catch (e) { console.error(e); }
   cleanup = null;
   const view = $('#view');
@@ -54,7 +97,7 @@ async function route() {
   try {
     const mod = await r.load();
     if (token !== navToken) return;
-    const result = await mod.render(view, { params, query });
+    const result = await mod.render(view, { params: r.params, query: r.query, course: r.course });
     if (token !== navToken) { result?.(); return; }
     cleanup = typeof result === 'function' ? result : null;
     hydrateIcons(view);
@@ -64,6 +107,41 @@ async function route() {
     hydrateIcons(view);
   }
   window.scrollTo({ top: 0 });
+}
+
+/* --------------------------------------------------------------- sidebar */
+function renderNav(r = resolve()) {
+  if (!r) return;
+  const cur = r.course;
+  const link = (href, ic, label, active, extra = '') => `<a href="${href}" class="${active ? 'active' : ''}" ${extra}><i data-icon="${ic}"></i><span>${esc(label)}</span></a>`;
+  let html = link('#/', 'home', 'Study desk', r.key === 'home');
+  html += '<div class="nav-label">Courses</div>';
+  for (const c of store.courses) {
+    const pct = progressCache?.courses?.[c.id]?.progress_pct;
+    html += `<a href="#/c/${c.id}" class="course-tab ${cur === c.id ? 'current' : ''}"><span class="dot" style="background:var(--c-${c.id})"><i data-icon="${c.icon}"></i></span><span>${esc(c.title)}</span>${pct ? `<span class="pct">${pct}%</span>` : ''}</a>`;
+    if (cur === c.id) {
+      html += `<div class="course-sub" style="--course:var(--c-${c.id})">
+        ${link(`#/c/${c.id}`, 'notebook', 'Overview', r.key === 'overview')}
+        ${link(`#/c/${c.id}/learn`, 'book', 'Lessons', r.key === 'learn')}
+        ${c.labs.map((l) => link(`#/c/${c.id}/lab/${l.id}`, l.icon, l.title, r.key === `lab:${l.id}`)).join('')}
+        ${link(`#/c/${c.id}/challenges`, 'trophy', 'Challenges', r.key === 'challenges')}
+      </div>`;
+    }
+  }
+  html += '<div class="nav-label">Study tools</div>';
+  html += link('#/tutor', 'bot', 'AI Tutor (Q-Bot)', r.key === 'tutor');
+  html += link('#/progress', 'chart', 'My Progress', r.key === 'progress');
+  html += link('#/instructor', 'users', 'Instructor', r.key === 'instructor');
+  html += link('#/about', 'info', 'About the Project', r.key === 'about');
+  $('#nav').innerHTML = html;
+  hydrateIcons($('#nav'));
+}
+
+export async function refreshProgress() {
+  if (!store.user) { progressCache = null; return null; }
+  try { progressCache = await api.progress(store.user.id); } catch { progressCache = null; }
+  renderNav();
+  return progressCache;
 }
 
 /* --------------------------------------------------------------- shared actions */
@@ -86,15 +164,29 @@ function closeDrawer() {
 export function loadIntoBuilder(numQubits, operations, title) {
   store.set('circuit', { num_qubits: numQubits, operations });
   if (title) toast(`Loaded “${esc(title)}” into the Circuit Builder`, 'success', 2200);
-  navigate('/builder');
+  navigate('/c/quantum/lab/builder');
 }
 
 export function loadIntoLab(operations) {
   sessionStorage.setItem('q3d-lab-ops', JSON.stringify(operations));
-  navigate('/lab');
+  navigate('/c/quantum/lab/bloch');
 }
 
-/* --------------------------------------------------------------- profile */
+/** Open any course lab with a preset configuration. */
+export function openLab(course, lab, preset = {}) {
+  sessionStorage.setItem('q3d-lab-preset', JSON.stringify({ course, lab, preset }));
+  navigate(`/c/${course}/lab/${lab}`);
+}
+
+export function takeLabPreset(course, lab) {
+  try {
+    const p = JSON.parse(sessionStorage.getItem('q3d-lab-preset') || 'null');
+    if (p && p.course === course && p.lab === lab) { sessionStorage.removeItem('q3d-lab-preset'); return p.preset || {}; }
+  } catch { /* ignore */ }
+  return {};
+}
+
+/* --------------------------------------------------------------- profile & theme */
 function renderUserChip() {
   const u = store.user;
   $('#user-chip').innerHTML = u
@@ -102,13 +194,20 @@ function renderUserChip() {
     : `<span class="avatar">?</span><span class="uname">Sign in<small>save your progress</small></span>`;
 }
 
+function setTheme(t) {
+  store.set('theme', t);
+  document.documentElement.dataset.theme = t;
+  $('#theme-btn').innerHTML = icon(t === 'dark' ? 'sun' : 'moon');
+  document.querySelector('meta[name="theme-color"]').content = t === 'dark' ? '#14161d' : '#f8f4ea';
+}
+
 export function openProfile(force = false) {
   const m = $('#modal');
   const u = store.user;
   m.hidden = false;
   m.innerHTML = `<form class="modal-card stack" data-form>
-    <div><h2>${u ? 'Your profile' : 'Welcome to Q-3D Learn'} ✨</h2>
-    <p class="muted small">${u ? 'Update your details or switch profile.' : 'Create a learner profile to save lesson progress, quiz scores, challenges and experiments. No password needed.'}</p></div>
+    <div><span class="hand" style="font-size:1.4rem;color:var(--pink)">${u ? 'hello again!' : 'welcome, new student!'}</span><h2>${u ? 'Your profile' : 'Open your study notebook'}</h2>
+    <p class="muted small">${u ? 'Update your details or switch profile.' : 'Create a learner profile to save lessons, quiz scores, challenges and experiments across all four courses. No password needed.'}</p></div>
     <label class="field">Your name<input class="input" name="name" maxlength="80" required value="${esc(u?.name || '')}" placeholder="e.g. Ada"></label>
     <div class="role-pick">
       <label><input type="radio" name="role" value="student" ${u?.role !== 'instructor' ? 'checked' : ''}> <span><b>Student</b><br><small class="faint">Learn & experiment</small></span></label>
@@ -124,7 +223,7 @@ export function openProfile(force = false) {
   setTimeout(() => form.name.focus(), 50);
   const close = () => { m.hidden = true; m.innerHTML = ''; };
   m.querySelector('[data-close]')?.addEventListener('click', () => { sessionStorage.setItem('q3d-skip-profile', '1'); close(); });
-  m.querySelector('[data-signout]')?.addEventListener('click', () => { store.set('user', null); renderUserChip(); close(); toast('Signed out'); route(); });
+  m.querySelector('[data-signout]')?.addEventListener('click', () => { store.set('user', null); progressCache = null; renderUserChip(); close(); toast('Signed out'); route(); });
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = form.name.value.trim();
@@ -141,6 +240,7 @@ export function openProfile(force = false) {
       renderUserChip();
       close();
       toast(`Welcome, ${esc(user.name)}!`, 'success');
+      await refreshProgress();
       route();
     } catch (err) { toast(err.message, 'error'); }
   });
@@ -156,8 +256,8 @@ async function checkBackend() {
     const q = sys.qiskit.available ? 'Qiskit Aer' : 'Q3D engine';
     const ai = sys.ai_provider === 'offline' ? 'offline tutor' : sys.ai_provider;
     $('#status-text').textContent = `${q} · ${ai}`;
-    pill.title = `Backend v${sys.version} · DB ${sys.database} · Simulator: ${q} · AI: ${ai}`;
-    $('#drawer-provider').textContent = sys.ai_provider === 'offline' ? 'Offline tutor (add an API key for LLM answers)' : `Powered by ${sys.ai_provider}`;
+    pill.title = `Backend v${sys.version} · DB ${sys.database} · Quantum: ${q} · AI: ${ai}`;
+    $('#drawer-provider').textContent = sys.ai_provider === 'offline' ? 'offline study buddy (add an API key for LLM answers)' : `powered by ${sys.ai_provider}`;
   } catch {
     pill.className = 'status-pill err';
     $('#status-text').textContent = 'Backend offline';
@@ -166,31 +266,34 @@ async function checkBackend() {
 
 async function boot() {
   hydrateIcons();
+  setTheme(store.theme === 'dark' ? 'dark' : 'light');
   renderUserChip();
   $('#menu-btn').addEventListener('click', () => $('#sidebar').classList.toggle('open'));
   $('#open-drawer').addEventListener('click', () => openDrawer());
   $('#close-drawer').addEventListener('click', closeDrawer);
   $('#scrim').addEventListener('click', closeDrawer);
   $('#user-chip').addEventListener('click', () => openProfile());
+  $('#theme-btn').addEventListener('click', () => { setTheme(store.theme === 'dark' ? 'light' : 'dark'); route(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
 
   checkBackend();
   try {
-    const g = await api.gates();
+    const [g, courses] = await Promise.all([api.gates(), api.courses()]);
     store.gates = Object.fromEntries(g.gates.map((x) => [x.name, x]));
+    store.courses = courses;
   } catch {
     toast('Cannot reach the Q-3D Learn backend. Start it with <code>python run.py</code>.', 'error', 8000);
   }
-  // validate a remembered user still exists (e.g. after the DB was reset)
   if (store.user) {
     try { store.set('user', { ...store.user, ...(await api.getUser(store.user.id)) }); } catch (e) { if (e.status === 404) store.set('user', null); }
     renderUserChip();
   }
   window.addEventListener('hashchange', route);
+  refreshProgress();
   await route();
   if (!store.user && !sessionStorage.getItem('q3d-skip-profile')) setTimeout(() => openProfile(), 900);
 }
 
 boot();
 
-export { icon };
+export { icon, progressCache };

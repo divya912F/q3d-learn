@@ -1,98 +1,91 @@
-import { BlochSphere } from '../three/bloch.js';
-import { esc, gateColor } from '../ui.js';
+// Study desk: course catalogue, continue-learning and the platform story.
 import { store } from '../store.js';
-import { applyGate, blochOf, ketString, ZERO } from '../quantum.js';
-
-const FEATURES = [
-  ['learn', 'book', 'Learn', 'Concepts', 'Bite-size lessons with formulas, insights and quizzes.', 'var(--g-superposition)'],
-  ['builder', 'circuit', 'Build', 'Circuits', 'Drag-and-drop gates or write OpenQASM in the code editor.', 'var(--violet)'],
-  ['lab', 'chart', 'Simulate', '& Analyze', 'Real statevector + Qiskit Aer simulation with 3D state views.', 'var(--green)'],
-  ['tutor', 'bot', 'Ask AI', '(Text + Voice)', 'A context-aware tutor that sees your circuit and its results.', 'var(--pink)'],
-  ['challenges', 'bulb', 'Experiment', '& Understand', 'Challenges, algorithms and what-if experiments.', 'var(--amber)'],
-];
+import { esc, icon, hydrateIcons } from '../ui.js';
+import { courseArt } from '../art.js';
+import { navigate, openLab, refreshProgress } from '../main.js';
 
 const JOURNEY = [
-  ['😕', 'Confused', 'Abstract theory'], ['💡', 'Visualize', '3D intuition'], ['🔧', 'Build', 'Your circuits'],
-  ['▶️', 'Simulate', 'Real results'], ['🤖', 'Ask', 'AI guidance'], ['🧪', 'Experiment', 'What-if'], ['🏆', 'Master', 'Concepts & skills'],
+  ['😕', 'Confused', 'Abstract theory'], ['💡', 'Visualize', 'See it in 2D & 3D'], ['🔧', 'Build', 'Circuits, models, pipelines'],
+  ['▶️', 'Simulate', 'Real computation'], ['🤖', 'Ask', 'AI study buddy'], ['🧪', 'Experiment', 'What-if & challenges'], ['🏆', 'Master', 'Concepts & skills'],
 ];
 
-const DEMO_SEQ = ['h', 't', 's', 'x', 'h', 'y', 'sx', 'z', 'h'];
-
 export async function render(root) {
+  const courses = store.courses;
+  const p = store.user ? await refreshProgress() : null;
+  const hello = store.user ? `hi ${esc(store.user.name.split(' ')[0])}! ✏️` : 'hello, curious mind! ✏️';
   root.innerHTML = `
   <section class="hero">
     <div>
-      <span class="eyebrow">SIH26140 · Smart Education · Team SRIJAN</span>
-      <h1><span class="grad">Q-3D Learn</span><br>see quantum computing.</h1>
-      <p class="sub">An AI-powered interactive lab that makes quantum computing <b>visual</b>, <b>interactive</b> and <b>accessible</b> to every learner.</p>
+      <span class="greeting">${hello}</span>
+      <h1>Learn the future of tech by <span class="scribble">seeing it<svg viewBox="0 0 200 18" preserveAspectRatio="none"><path d="M3 12 C 40 3, 80 16, 120 8 S 180 6, 197 10" fill="none" stroke="#fcc419" stroke-width="5" stroke-linecap="round"/></svg></span>.</h1>
+      <p class="sub">Four visual courses — <b>Quantum Computing</b>, <b>Machine Learning</b>, <b>Data Science</b> and <b>AI</b> — each with lessons, interactive labs, real simulations, challenges and an AI study buddy.</p>
       <div class="row">
-        <a class="btn btn-primary btn-lg" href="#/learn"><i data-icon="book"></i>Start learning</a>
-        <a class="btn btn-ghost btn-lg" href="#/builder"><i data-icon="circuit"></i>Open Circuit Builder</a>
+        <a class="btn btn-primary btn-lg" href="#/c/${p ? (Object.entries(p.courses).find(([, c]) => c.started)?.[0] || 'ml') : 'ml'}">${icon('book')} ${p && p.lessons_completed_total ? 'Continue studying' : 'Start learning'}</a>
+        <a class="btn btn-ghost btn-lg" href="#/tutor">${icon('bot')} Ask Q-Bot</a>
       </div>
-      <div class="row" style="margin-top:22px;gap:20px">
-        <span class="muted small"><b style="color:var(--text)">8</b> lessons</span>
-        <span class="muted small"><b style="color:var(--text)">9</b> challenges</span>
-        <span class="muted small"><b style="color:var(--text)">8</b> algorithms</span>
-        <span class="muted small"><b style="color:var(--text)">${Object.keys(store.gates).length || 23}</b> gates</span>
-      </div>
+      ${p ? `<div class="row" style="margin-top:20px;gap:22px">
+        <span class="muted small"><b style="color:var(--text);font-size:1.1rem">${p.xp}</b> XP · level ${p.level}</span>
+        <span class="muted small"><b style="color:var(--text);font-size:1.1rem">${p.streak}</b> day streak 🔥</span>
+        <span class="muted small"><b style="color:var(--text);font-size:1.1rem">${p.lessons_completed_total}</b> lessons done</span></div>` : ''}
     </div>
-    <div class="hero-stage" data-stage>
-      <div class="float-card" style="top:18px;left:18px"><div class="faint tiny">STATE</div><div class="ket" data-ket>|0⟩</div></div>
-      <div class="float-card" style="top:18px;right:18px;text-align:right"><div class="faint tiny">LAST GATE</div><div data-gate style="margin-top:4px">—</div></div>
-      <div class="float-card" style="bottom:18px;left:18px"><div class="faint tiny">P(0) / P(1)</div><div class="mono" data-p>1.00 / 0.00</div></div>
-      <div class="float-card faint" style="bottom:18px;right:18px;font-size:.75rem">drag to orbit · scroll to zoom</div>
+    <div class="desk" aria-hidden="true">
+      <div class="note" style="left:4%;top:6%;width:44%;background:#fff3bf;transform:rotate(-4deg)"><small>Quantum</small>|ψ⟩ = α|0⟩ + β|1⟩<br><span style="font-size:1rem">rotate me on the Bloch sphere!</span></div>
+      <div class="note" style="right:2%;top:2%;width:46%;background:#ffe8cc;transform:rotate(3deg)"><small>Machine Learning</small>w ← w − η·∂L/∂w<br><span style="font-size:1rem">roll downhill on the loss</span></div>
+      <div class="note" style="left:10%;bottom:6%;width:42%;background:#d3f9d8;transform:rotate(2.5deg)"><small>Data Science</small>median &lt; mean?<br><span style="font-size:1rem">→ right-skewed!</span></div>
+      <div class="note" style="right:6%;bottom:10%;width:44%;background:#e5dbff;transform:rotate(-2deg)"><small>AI</small>f(n) = g(n) + h(n)<br><span style="font-size:1rem">A* finds the way</span></div>
     </div>
   </section>
 
+  <div class="section-title"><h2>Your courses</h2><span class="hand">pick a notebook →</span></div>
+  <div class="course-grid">${courses.map((c) => {
+    const cp = p?.courses?.[c.id];
+    return `<a class="card course-card" href="#/c/${c.id}" style="--cc:var(--c-${c.id})">
+      <div class="cover"><span class="label">${esc(c.title)}</span>${courseArt(c.id)}</div>
+      <div class="body"><p>${esc(c.tagline)}</p>
+        <div class="meta"><span>${icon('book')} ${c.lessons} lessons</span><span>${icon('flask')} ${c.labs.length} labs</span><span>${icon('trophy')} ${c.challenges} challenges</span></div>
+        <div class="progress" style="margin-top:auto"><span style="width:${cp?.progress_pct || 0}%"></span></div>
+        <div class="row-between tiny faint"><span>${cp ? `${cp.lessons_completed.length}/${cp.lessons_total} lessons · ${cp.challenges_solved.length} challenges` : `${c.level} · ~${c.minutes} min`}</span><span>${cp?.progress_pct || 0}%</span></div>
+      </div></a>`;
+  }).join('')}</div>
+
+  ${p?.recommendations?.length ? `<div class="section-title"><h2>Pick up where you left off</h2></div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))" data-recs>${p.recommendations.map((r, i) => `<div class="rec" data-rec="${i}" style="--course:var(--c-${r.course})"><div class="ic" style="background:color-mix(in srgb, var(--course) 15%, transparent);color:var(--course)"><i data-icon="${{ lesson: 'book', challenge: 'trophy', lab: 'flask', course: 'notebook' }[r.type] || 'book'}"></i></div><div><b>${esc(r.title)}</b><small>${esc(r.reason)}</small></div></div>`).join('')}</div>` : ''}
+
+  <div class="section-title"><h2>Every course has the same study toolkit</h2></div>
   <div class="grid features">
-    ${FEATURES.map(([route, ic, t, sub, desc, c]) => `
-      <a class="card feature" href="#/${route}">
-        <div class="ic" style="background:color-mix(in srgb, ${c} 18%, transparent);color:${c}"><i data-icon="${ic}"></i></div>
-        <h3>${t} <span class="faint" style="font-weight:500;font-size:.85rem">${sub}</span></h3><p>${desc}</p>
-      </a>`).join('')}
+    ${[['book', 'Learn', 'Short lessons with formulas, insights and quizzes.', 'var(--c-quantum)'],
+      ['eye', 'Visualise', '3D Bloch spheres, decision boundaries, loss landscapes, search animations.', 'var(--c-ml)'],
+      ['zap', 'Simulate', 'Real computation in Python: Qiskit/NumPy simulators, ML training, statistics.', 'var(--c-ds)'],
+      ['bot', 'Ask AI', 'Q-Bot answers in text or voice, grounded on your actual results.', 'var(--c-ai)'],
+      ['trophy', 'Challenge', 'Auto-graded puzzles, XP, streaks and a progress dashboard.', 'var(--pink)']].map(([ic, t, d, c]) => `
+      <div class="card feature"><div class="ic" style="background:color-mix(in srgb, ${c} 15%, transparent);color:${c}"><i data-icon="${ic}"></i></div><h3>${t}</h3><p>${d}</p></div>`).join('')}
   </div>
 
-  <div class="section-title"><h2>The learning journey</h2><span class="muted small">From abstract theory to an interactive quantum lab</span></div>
+  <div class="section-title"><h2>The learning journey</h2><span class="hand">from abstract theory to an interactive lab</span></div>
   <div class="card"><div class="journey">${JOURNEY.map(([e, t, s]) => `<div class="journey-step"><div class="dot">${e}</div><b>${t}</b><span>${s}</span></div>`).join('')}</div></div>
 
-  <div class="section-title"><h2>Problem statement</h2></div>
-  <div class="ps-strip">
-    <div class="card"><div class="ic" style="background:rgba(79,140,255,.15);color:var(--primary)"><i data-icon="target"></i></div><div><small>Problem statement</small><b>AI-Based Interactive Quantum Algorithm Learning Platform</b></div></div>
-    <div class="card"><div class="ic" style="background:rgba(155,123,255,.15);color:var(--violet)"><i data-icon="cap"></i></div><div><small>Theme</small><b>Smart Education</b></div></div>
-    <div class="card"><div class="ic" style="background:rgba(52,211,153,.15);color:var(--green)"><i data-icon="users"></i></div><div><small>Team</small><b>SRIJAN</b></div></div>
+  <div class="section-title"><h2>Try a lab right now</h2></div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
+    ${[['quantum', 'bloch', 'Spin a qubit in 3D'], ['ml', 'classifier', 'Watch a neural net learn'], ['ds', 'pipeline', 'Clean a messy dataset'], ['ai', 'search', 'Race BFS vs A*']].map(([c, l, t]) => {
+      const lab = courses.find((x) => x.id === c)?.labs.find((x) => x.id === l);
+      return lab ? `<a class="card lab-card" style="--course:var(--c-${c})" href="#/c/${c}/lab/${l}"><div class="ic"><i data-icon="${lab.icon}"></i></div><div><b>${t}</b><p>${esc(lab.title)}</p></div></a>` : '';
+    }).join('')}
   </div>
-  <p class="quote">“From abstract theory to an <b>interactive quantum lab</b>.”</p>
-  <p class="center"><a href="#/about" class="btn btn-ghost">Read about the project <i data-icon="arrowRight"></i></a></p>`;
 
-  const stage = root.querySelector('[data-stage]');
-  const sphere = new BlochSphere(stage, { autoRotate: true, interactive: true });
-  sphere.controls.autoRotateSpeed = 0.5;
-  let state = ZERO;
-  let i = 0;
-  let alive = true;
-  const loop = async () => {
-    await new Promise((r) => setTimeout(r, 1400));
-    while (alive) {
-      const name = DEMO_SEQ[i++ % DEMO_SEQ.length];
-      const g = store.gates[name];
-      const gEl = root.querySelector('[data-gate]');
-      if (gEl) gEl.innerHTML = `<span class="gate-badge" style="background:${gateColor(g)}">${esc(g?.label || name.toUpperCase())}</span>`;
-      if (g?.bloch_axis) await sphere.rotate(g.bloch_axis, rotAngle(name), 1100);
-      state = applyGate(state, name);
-      const b = blochOf(state);
-      sphere.place(b, false);
-      const ket = root.querySelector('[data-ket]');
-      if (!ket) break;
-      ket.textContent = ketString(state);
-      const p0 = state[0][0] ** 2 + state[0][1] ** 2;
-      root.querySelector('[data-p]').textContent = `${p0.toFixed(2)} / ${(1 - p0).toFixed(2)}`;
-      await new Promise((r) => setTimeout(r, 1300));
-    }
-  };
-  loop();
-  return () => { alive = false; sphere.dispose(); };
-}
-
-function rotAngle(name) {
-  return { h: Math.PI, x: Math.PI, y: Math.PI, z: Math.PI, s: Math.PI / 2, t: Math.PI / 4, sx: Math.PI / 2 }[name] ?? 0;
+  <div class="section-title"><h2>About this project</h2></div>
+  <div class="ps-strip">
+    <div class="card"><div class="ic" style="background:var(--hl-blue);color:var(--primary)"><i data-icon="target"></i></div><div><small>Problem statement SIH26140</small><b>AI-Based Interactive Algorithm Learning Platform</b></div></div>
+    <div class="card"><div class="ic" style="background:var(--hl-green);color:var(--green)"><i data-icon="cap"></i></div><div><small>Theme</small><b>Smart Education</b></div></div>
+    <div class="card"><div class="ic" style="background:var(--hl-pink);color:var(--pink)"><i data-icon="users"></i></div><div><small>Team</small><b>SRIJAN</b></div></div>
+  </div>
+  <p class="quote">“From abstract theory to an interactive lab.”</p>
+  <p class="center"><a href="#/about" class="btn btn-ghost">Read about the project ${icon('arrowRight')}</a></p>`;
+  hydrateIcons(root);
+  root.querySelectorAll('[data-rec]').forEach((el) => el.addEventListener('click', () => {
+    const r = p.recommendations[+el.dataset.rec];
+    if (r.type === 'lesson') navigate(`/c/${r.course}/learn/${r.id}`);
+    else if (r.type === 'challenge') navigate(`/c/${r.course}/challenges/${r.id}`);
+    else if (r.type === 'lab') openLab(r.course, r.id);
+    else navigate(`/c/${r.course}`);
+  }));
 }

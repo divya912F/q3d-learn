@@ -3,7 +3,7 @@ import math
 import numpy as np
 import pytest
 
-from app.content.challenges import CHALLENGES, check_challenge
+from app.courses.quantum.challenges import CHALLENGES, check_challenge
 from app.quantum.algorithms import ALGORITHMS
 from app.quantum.qasm import from_qasm, to_qasm
 from app.quantum.simulator import run_circuit

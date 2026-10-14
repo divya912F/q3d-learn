@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import numpy as np
 
-from ..quantum.analysis import fidelity
-from ..quantum.simulator import StatevectorSimulator, normalize_ops
-from ..quantum.validation import validate_circuit
+from ...quantum.analysis import fidelity
+from ...quantum.simulator import StatevectorSimulator, normalize_ops
+from ...quantum.validation import validate_circuit
 
 S = 1 / np.sqrt(2)
 

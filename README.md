@@ -2,11 +2,10 @@
 
 # ⚛️ Q-3D Learn
 
-### AI-Powered Interactive Quantum Learning Platform
+### Your visual study desk for the future of tech
 
-**Making quantum computing _visual_, _interactive_ and _accessible_ to every learner.**
-
-Learn concepts · Build circuits · Simulate & analyse · Ask AI (text + voice) · Experiment & understand
+**Four interactive courses — Quantum Computing · Machine Learning · Data Science · Artificial Intelligence**
+<br>Learn concepts · Play with visual labs · Run real computations · Ask an AI tutor (text + voice) · Solve challenges · Track progress
 
 [![CI](https://github.com/YOUR-USERNAME/q3d-learn/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
@@ -15,41 +14,47 @@ Learn concepts · Build circuits · Simulate & analyse · Ask AI (text + voice) 
 ![Qiskit](https://img.shields.io/badge/quantum-Qiskit%20Aer-6929C4)
 ![License: MIT](https://img.shields.io/badge/license-MIT-green)
 
-*Smart India Hackathon 2026 · Problem statement **SIH26140** — AI-Based Interactive Quantum Algorithm Learning Platform · Theme: Smart Education · Team **SRIJAN***
+*Smart India Hackathon 2026 · Problem statement **SIH26140** — AI-Based Interactive Algorithm Learning Platform · Theme: Smart Education · Team **SRIJAN***
 
-![Q-3D Learn home](docs/screenshots/home.png)
+![Q-3D Learn study desk](docs/screenshots/home.png)
 
 </div>
 
 ---
 
-## ✨ What it does
+## ✨ What's inside
 
-Q-3D Learn is a complete learning experience, not just a simulator. A student moves from **confused → visualise → build → simulate → ask → experiment → master**:
+Every course is a "notebook" with the **same study toolkit**: lessons with formulas and quizzes, hands-on **visual labs** powered by real Python computation, auto-graded **challenges**, a context-aware **AI tutor** and **progress tracking**.
 
-| Section | What you get |
-|---|---|
-| 📖 **Lessons** | 8-lesson curriculum (qubits → Grover), formulas, insight call-outs, "Try it" buttons that open the lab/builder, server-graded quizzes |
-| 🌐 **3D Lab** | Big interactive Bloch sphere: gates animate as real rotations about their axis, θ/φ sliders, trails, projections, measurement with collapse, ×200 shot histogram |
-| 🔧 **Circuit Builder** | Drag-and-drop or click-to-place gates (H, X, Y, Z, S, T, √X, RX/RY/RZ, P, CNOT, CZ, CY, CH, CP, SWAP, Toffoli, measure, barrier), parameter editor, undo/redo, save, share links |
-| ▶️ **Simulation** | Exact statevector engine + **Qiskit Aer** counts when installed; histogram vs. exact probabilities, state-vector table with phase colours, amplitude circles, per-qubit Bloch spheres, 3D **Q-Sphere**, **step-through slider** that replays the circuit gate by gate |
-| 💻 **Code** | OpenQASM 2.0 editor (Monaco) with import ⇄ circuit, plus auto-generated runnable Qiskit Python |
-| 🧪 **Algorithms** | Guided walkthroughs: Bell, GHZ, superdense coding, teleportation, Deutsch–Jozsa, Bernstein–Vazirani, Grover, QFT |
-| 🏆 **Challenges** | 9 puzzles graded by state **fidelity** (with gate restrictions), hints, XP |
-| 🤖 **AI Tutor (Q-Bot)** | Context-aware: sees your current circuit and its *re-computed* simulation results; voice input and read-aloud; works offline, or with OpenAI / Gemini / any OpenAI-compatible model (e.g. Ollama) |
-| 📈 **My Progress** | XP & levels, topic-mastery radar, activity, learning path, experiment history, personalised recommendations |
-| 👩‍🏫 **Instructor** | Classrooms with join codes, weak-topic heatmap, sortable student analytics, assignments with completion tracking, one-click demo class |
-| ℹ️ **About** | The full proposal: idea, architecture, tech stack, feasibility, impact, references |
+| Course | Lessons | Visual labs (all computed in Python) | Challenges |
+|---|---|---|---|
+| ⚛️ **Quantum Computing** | 8 — qubits → Grover | **3D Bloch sphere** with animated gate rotations · **Circuit builder** (drag & drop, statevector + Qiskit Aer, Q-sphere, step-through, OpenQASM/Qiskit code) · **Algorithm library** (Bell, GHZ, teleportation, Deutsch–Jozsa, Bernstein–Vazirani, Grover, QFT) | 9 state-preparation puzzles graded by fidelity |
+| 🧠 **Machine Learning** | 7 — intro → overfitting | **Regression & gradient descent** with a **3D loss landscape** and degree sweep · **Classifier playground** (logistic regression, k-NN, decision tree, neural network) with live decision boundaries, network-weight and tree diagrams · **k-means** step-through with elbow & silhouette | 6 (tune η, tiny network, spiral, shallow tree, detective questions) |
+| 📊 **Data Science** | 6 — lifecycle → CLT | **Data explorer** (table, summary stats, histograms, scatter + trend line, correlation heatmap, group compare) · **Cleaning pipeline** builder with before/after quality · **Probability lab** (distributions + Central Limit Theorem) | 6 (incl. "Data Janitor" pipeline task) |
+| 🤖 **Artificial Intelligence** | 7 — agents → responsible AI | **Pathfinding visualiser** (BFS/DFS/UCS/Greedy/A*, paint walls & mud) · **Minimax tic-tac-toe** with move scores and alpha–beta stats · **Q-learning gridworld** (values, policy arrows, reward curve) · **Next-word predictor** (n-gram LM, temperature, token-by-token) | 4 |
+
+Plus, across all courses:
+
+- 🤖 **Q-Bot, the AI study buddy** — answers by text or **voice** (Web Speech API), sees the course you're in and your **latest lab result / circuit**, and shows the facts it was grounded on. Works fully **offline**, or with OpenAI / Gemini / any OpenAI-compatible model (e.g. Ollama).
+- 📈 **My Progress** — XP, levels, study streak, per-course progress, topic-mastery radar, learning path, recommendations, experiment history.
+- 👩‍🏫 **Instructor dashboard** — classrooms with join codes, all-courses or per-course mastery heatmaps, weak-topic alerts, sortable student table, assignments from any course with completion tracking, one-click demo class.
+- 📝 **Study theme** — warm "notebook paper" light theme with highlighter accents, sticky notes and chalkboard panels for 3D/simulations, plus a **night-study dark mode**. Responsive down to phones.
 
 ## 📸 Screenshots
 
-| Circuit builder | 3D Lab |
+| Classifier playground (ML) | 3D loss landscape (ML) |
 |---|---|
-| ![builder](docs/screenshots/circuit-builder.png) | ![lab](docs/screenshots/3d-lab.png) |
-| **Algorithm walkthrough (Grover)** | **AI tutor grounded on your circuit** |
-| ![grover](docs/screenshots/algorithm-grover.png) | ![tutor](docs/screenshots/ai-tutor.png) |
-| **Instructor dashboard** | **Learner progress** |
-| ![instructor](docs/screenshots/instructor.png) | ![progress](docs/screenshots/progress.png) |
+| ![classifier](docs/screenshots/ml-classifier.png) | ![landscape](docs/screenshots/ml-loss-landscape.png) |
+| **Cleaning pipeline (Data Science)** | **Pathfinding visualiser (AI)** |
+| ![pipeline](docs/screenshots/ds-pipeline.png) | ![search](docs/screenshots/ai-search.png) |
+| **Q-learning gridworld (AI)** | **Circuit builder (Quantum)** |
+| ![rl](docs/screenshots/ai-qlearning.png) | ![builder](docs/screenshots/quantum-builder.png) |
+| **Lesson with quiz** | **AI tutor grounded on your lab run** |
+| ![lesson](docs/screenshots/lesson.png) | ![tutor](docs/screenshots/ai-tutor.png) |
+| **Instructor dashboard** | **Night-study dark mode** |
+| ![instructor](docs/screenshots/instructor.png) | ![dark](docs/screenshots/dark-mode.png) |
+
+More in [`docs/screenshots`](docs/screenshots): data explorer, probability lab, k-means, next-word predictor, Bloch lab, progress page.
 
 ## 🚀 Quick start
 
@@ -64,13 +69,13 @@ pip install -r requirements.txt
 python run.py
 ```
 
-Open **http://localhost:8000** — interactive API docs are at **http://localhost:8000/docs**.
+Open **http://localhost:8000** — interactive API docs live at **http://localhost:8000/docs**.
 
-> Tip: on the Instructor page click **Load demo class** to see analytics with 10 sample students.
+> Tip: on the Instructor page click **Load demo class** to explore analytics with 12 sample students across all four courses.
 
 ### Optional: AI provider
 
-The tutor works out of the box in **offline mode** (validated knowledge base + live circuit analysis). For free-form LLM answers:
+Q-Bot works out of the box in **offline mode** (validated knowledge base for every course + live analysis of your circuits and lab runs). For free-form LLM answers:
 
 ```bash
 cp .env.example .env
@@ -93,96 +98,97 @@ docker compose up --build
 
 ```bash
 pip install -r requirements-dev.txt
-pytest
+pytest          # 64 tests: simulators, ML/DS/AI engines, content integrity, API
 ```
 
 ## 🏗️ Architecture
 
 ```
-Student (browser: laptop / tablet / mobile)
+Student (browser: laptop / tablet / phone)
         │
-Frontend  ── ES modules + Three.js (3D) + Monaco + KaTeX + Web Speech API   (frontend/)
-        │  REST/JSON
-Backend   ── FastAPI routers: quantum · learning · community                (app/api/)
-   ├── Quantum layer ── Q3D NumPy statevector engine  +  Qiskit Aer           (app/quantum/)
-   ├── AI layer      ── context builder → OpenAI | Gemini | offline tutor    (app/ai/)
-   ├── Content       ── lessons, quizzes, challenges                         (app/content/)
-   └── Analytics     ── XP, mastery, recommendations, class overview         (app/services/)
+Frontend ── ES modules · Three.js (3D) · Canvas/SVG charts · Monaco · KaTeX · Web Speech API     (frontend/)
+        │  REST / JSON
+Backend  ── FastAPI routers: courses & learning · quantum · labs (ml/ds/ai) · tutor & classrooms   (app/api/)
+   ├── Course registry ── quantum · ml · ds · ai  (lessons, quizzes, challenges, tutor knowledge)  (app/courses/)
+   ├── Engines         ── quantum statevector + Qiskit Aer      (app/quantum/)
+   │                      NumPy ML: GD regression, logistic, k-NN, CART tree, MLP+Adam, k-means   (app/courses/ml/engine.py)
+   │                      Data science: datasets, stats, cleaning pipeline, CLT                    (app/courses/ds/engine.py)
+   │                      AI: BFS/DFS/UCS/Greedy/A*, minimax+α–β, Q-learning, n-gram LM           (app/courses/ai/engine.py)
+   ├── AI tutor        ── grounding (circuit + lab facts + validated notes) → OpenAI | Gemini | offline   (app/ai/)
+   └── Analytics       ── per-course XP, mastery, streaks, recommendations, class overview         (app/services/)
         │
-Database  ── SQLAlchemy 2 → SQLite (default) or PostgreSQL                    (app/database.py)
+Database ── SQLAlchemy 2 → SQLite (default) or PostgreSQL                                          (app/database.py)
 ```
 
 ```
 q3d-learn/
 ├── app/
-│   ├── main.py            FastAPI app + static frontend
-│   ├── config.py          env-driven settings
-│   ├── database.py        ORM models
-│   ├── schemas.py         request models
-│   ├── api/               quantum.py · learning.py · community.py
-│   ├── quantum/           gates · simulator · analysis · validation · qasm · qiskit_runner · algorithms
-│   ├── ai/                tutor.py (providers + grounding) · knowledge.py
-│   ├── content/           lessons.py · challenges.py
-│   └── services/          progress.py (analytics) · demo.py
+│   ├── main.py · config.py · database.py · schemas.py
+│   ├── api/            learning.py · quantum.py · labs.py · community.py
+│   ├── courses/        registry.py + quantum/ · ml/ · ds/ · ai/  (content.py + engine.py each)
+│   ├── quantum/        gates · simulator · analysis · validation · qasm · qiskit_runner · algorithms
+│   ├── ai/tutor.py     LLM providers + grounding + offline tutor
+│   └── services/       progress.py (analytics) · demo.py
 ├── frontend/
-│   ├── index.html · css/main.css
-│   ├── js/three/          bloch.js · qsphere.js · common.js
-│   ├── js/circuit/        editor.js · results.js · code.js
-│   ├── js/views/          one module per page
-│   └── vendor/three/      Three.js (bundled so 3D works offline)
-├── tests/                 pytest suite (simulator, algorithms, API)
-├── Dockerfile · docker-compose.yml · .github/workflows/ci.yml
+│   ├── index.html · css/main.css (study theme, light + dark)
+│   ├── js/views/       home · course · learn · labview · challenges · tutor · progress · instructor · about · quantum views
+│   ├── js/labs/        ml-regression · ml-classifier · ml-kmeans · ds-explorer · ds-pipeline · ds-stats · ai-search · ai-minimax · ai-rl · ai-nlp
+│   ├── js/three/       bloch.js · qsphere.js · landscape.js
+│   ├── js/circuit/     editor.js · results.js · code.js
+│   └── vendor/three/   Three.js (bundled so 3D works offline)
+├── tests/              test_simulator.py · test_courses.py · test_api.py
+└── Dockerfile · docker-compose.yml · .github/workflows/ci.yml
 ```
 
-### How the AI stays accurate
+### How the AI tutor stays accurate
 
-The proposal flagged **AI hallucination** as a key risk. Q-Bot mitigates it by design:
+1. **Grounded facts.** Every question is sent with facts the platform computed itself — the re-simulated quantum circuit, or the numbers from your latest lab run (accuracy, losses, path costs, statistics…).
+2. **Validated notes.** Concept explanations come from a curated knowledge base per course and are injected into the LLM prompt.
+3. **Offline fallback.** With no API key (or if the provider fails) a deterministic tutor answers from the same facts. Every answer shows what it was grounded on.
 
-1. Before answering, the backend **re-simulates the learner's circuit** and passes exact facts (state, probabilities, Bloch vectors, entanglement) to the model as authoritative context.
-2. Concept explanations come from a **curated knowledge base** that is injected into the prompt.
-3. With no key, or if the API fails, a **deterministic offline tutor** answers from the same facts. Every answer shows the facts it was grounded on.
+### Accuracy of the visuals
 
-### Simulation accuracy
-
-- Bit ordering follows Qiskit (q0 = least-significant bit, strings printed `q[n-1]…q0`).
-- Every result includes the exact pre-measurement statevector; sampled counts come from Qiskit Aer when available.
-- Mid-circuit measurement (re-using a measured qubit) switches to shot-by-shot trajectory simulation.
-- The test suite checks all 8 library algorithms against their known outcomes.
+All visuals are driven by real computation, never canned animations: the quantum views use an exact statevector simulator (Qiskit bit order, Qiskit Aer counts when installed); ML labs train real models with NumPy and record checkpoints; data-science charts come from the actual dataset statistics; AI labs replay the exact expansion order, minimax scores and Q-tables. The test suite checks known results (e.g. every quantum algorithm's outcome, A* optimality, the CLT standard error).
 
 ## 🔌 API overview
 
 | Method | Endpoint | Purpose |
 |---|---|---|
-| `POST` | `/api/simulate` | Run a circuit (`num_qubits`, `operations`, `shots`, `backend`) |
-| `POST` | `/api/qasm/export` · `/api/qasm/import` | OpenQASM 2.0 / Qiskit code |
-| `GET` | `/api/algorithms[/{id}]` | Algorithm library |
-| `GET` | `/api/lessons[/{id}]` · `POST /api/lessons/{id}/quiz` | Lessons & graded quizzes |
-| `GET` | `/api/challenges` · `POST /api/challenges/{id}/check` | Challenges |
-| `POST` | `/api/tutor/ask` | AI tutor |
-| `GET` | `/api/progress/{user_id}` | XP, mastery, recommendations |
-| `POST` | `/api/classrooms` · `GET /api/classrooms/{code}/overview` | Instructor analytics |
-
-Full schema: `/docs` (Swagger) when the server is running.
+| `GET` | `/api/courses` · `/api/courses/{course}` | Course catalogue and details |
+| `GET` | `/api/courses/{course}/lessons[/{id}]` | Lessons (quiz answers stay server-side) |
+| `POST` | `/api/courses/{course}/lessons/{id}/quiz` | Grade a quiz |
+| `POST` | `/api/courses/{course}/challenges/{id}/check` | Check a challenge (circuit, lab config or answer) |
+| `POST` | `/api/simulate` · `/api/qasm/export` · `/api/qasm/import` | Quantum simulation and code |
+| `POST` | `/api/ml/regression` · `/api/ml/classifier` · `/api/ml/kmeans` | ML labs |
+| `POST` | `/api/ds/explore` · `/api/ds/pipeline` · `/api/ds/sample` · `/api/ds/clt` | Data-science labs |
+| `POST` | `/api/ai/search` · `/api/ai/minimax` · `/api/ai/qlearn` · `/api/ai/lm` | AI labs |
+| `POST` | `/api/tutor/ask` | AI tutor (`course`, `circuit`, `lab` context) |
+| `GET` | `/api/progress/{user_id}` | XP, streak, per-course progress, recommendations |
+| `GET` | `/api/classrooms/{code}/overview?course=all\|ml\|…` | Instructor analytics |
 
 ```bash
-curl -X POST localhost:8000/api/simulate -H "Content-Type: application/json" -d '{
-  "num_qubits": 2,
-  "operations": [{"name": "h", "qubits": [0]}, {"name": "cx", "qubits": [0, 1]}],
-  "shots": 1024
-}'
+curl -X POST localhost:8000/api/ml/classifier -H "Content-Type: application/json" \
+  -d '{"config": {"dataset": "moons", "model": "mlp", "hidden": [8, 8], "epochs": 300}}'
 ```
+
+## ➕ Adding a course
+
+1. Create `app/courses/<id>/content.py` with `COURSE`, `LESSONS`, `CHALLENGES`, `check_challenge()` and `KNOWLEDGE` (copy an existing course).
+2. Optionally add an `engine.py` and endpoints in `app/api/labs.py`.
+3. Register it in `app/courses/registry.py`, add a colour `--c-<id>` in `frontend/css/main.css`, and lab modules in `frontend/js/views/labview.js`.
+4. `pytest` checks the content integrity automatically.
 
 ## 🗺️ Roadmap
 
-- [ ] Noise models (real-device noise via Qiskit Aer)
-- [ ] Run on real IBM Quantum hardware
-- [ ] More lessons (phase estimation, Shor, VQE) and multilingual content (Hindi first)
-- [ ] Password / SSO authentication for institutions
-- [ ] LMS integration (LTI)
+- [ ] More courses: Cybersecurity, Cloud, Blockchain
+- [ ] Noise models and real IBM Quantum hardware runs
+- [ ] CNN / image-classifier lab, transformer attention visualiser
+- [ ] Multilingual content (Hindi first)
+- [ ] Password / SSO authentication and LMS (LTI) integration
 
 ## 🤝 Contributing
 
-Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Good first issues: new lessons in `app/content/lessons.py`, new challenges, new algorithms in `app/quantum/algorithms.py`.
+Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Good first issues: new lessons or challenges in any `app/courses/*/content.py`, new datasets in `app/courses/ds/engine.py`, new mazes in `app/courses/ai/engine.py`.
 
 ## 📚 References
 
@@ -194,6 +200,6 @@ Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Good first
 
 ## 📄 License
 
-[MIT](LICENSE) © 2026 Team SRIJAN. Three.js is bundled under its own MIT licence (`frontend/vendor/three/LICENSE`).
+[MIT](LICENSE) © 2026 Team SRIJAN. Three.js is bundled under its own MIT licence (`frontend/vendor/three/LICENSE`). Datasets are synthetic and generated in code.
 
-<div align="center"><i>“From abstract theory to an interactive quantum lab.”</i></div>
+<div align="center"><i>“From abstract theory to an interactive lab.”</i></div>

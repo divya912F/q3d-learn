@@ -16,6 +16,7 @@ from sqlalchemy import (
     UniqueConstraint,
     create_engine,
 )
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 
@@ -40,6 +41,7 @@ class LessonProgress(Base):
     __tablename__ = "lesson_progress"
     __table_args__ = (UniqueConstraint("user_id", "lesson_id"),)
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    course: Mapped[str] = mapped_column(String(16), default="quantum", index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     lesson_id: Mapped[str] = mapped_column(String(64))
     completed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
@@ -48,6 +50,7 @@ class LessonProgress(Base):
 class QuizResult(Base):
     __tablename__ = "quiz_results"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    course: Mapped[str] = mapped_column(String(16), default="quantum", index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     lesson_id: Mapped[str] = mapped_column(String(64))
     topic: Mapped[str] = mapped_column(String(32))
@@ -60,6 +63,7 @@ class QuizResult(Base):
 class ChallengeAttempt(Base):
     __tablename__ = "challenge_attempts"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    course: Mapped[str] = mapped_column(String(16), default="quantum", index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
     challenge_id: Mapped[str] = mapped_column(String(64))
     topic: Mapped[str] = mapped_column(String(32))
@@ -74,11 +78,13 @@ class Experiment(Base):
 
     __tablename__ = "experiments"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    course: Mapped[str] = mapped_column(String(16), default="quantum", index=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
-    num_qubits: Mapped[int] = mapped_column(Integer)
-    gate_count: Mapped[int] = mapped_column(Integer)
-    depth: Mapped[int] = mapped_column(Integer)
+    num_qubits: Mapped[int] = mapped_column(Integer, default=0)
+    gate_count: Mapped[int] = mapped_column(Integer, default=0)
+    depth: Mapped[int] = mapped_column(Integer, default=0)
     backend: Mapped[str] = mapped_column(String(32))
+    lab: Mapped[str] = mapped_column(String(32), default="builder")
     state_name: Mapped[str] = mapped_column(String(64), default="")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
@@ -114,6 +120,7 @@ class Classroom(Base):
 class Assignment(Base):
     __tablename__ = "assignments"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    course: Mapped[str] = mapped_column(String(16), default="quantum", index=True)
     classroom_id: Mapped[int] = mapped_column(ForeignKey("classrooms.id", ondelete="CASCADE"), index=True)
     title: Mapped[str] = mapped_column(String(160))
     item_type: Mapped[str] = mapped_column(String(16))
@@ -139,6 +146,27 @@ def init_db(url: str) -> None:
     _engine = create_engine(url, **kwargs)
     _SessionLocal = sessionmaker(bind=_engine, expire_on_commit=False)
     Base.metadata.create_all(_engine)
+    _migrate(_engine)
+
+
+def _migrate(engine) -> None:
+    """Add columns introduced after v1.0 to existing databases (simple, additive only)."""
+    wanted = {
+        "lesson_progress": [("course", "VARCHAR(16) DEFAULT 'quantum'")],
+        "quiz_results": [("course", "VARCHAR(16) DEFAULT 'quantum'")],
+        "challenge_attempts": [("course", "VARCHAR(16) DEFAULT 'quantum'")],
+        "experiments": [("course", "VARCHAR(16) DEFAULT 'quantum'"), ("lab", "VARCHAR(32) DEFAULT 'builder'")],
+        "assignments": [("course", "VARCHAR(16) DEFAULT 'quantum'")],
+    }
+    insp = inspect(engine)
+    with engine.begin() as conn:
+        for table, cols in wanted.items():
+            if not insp.has_table(table):
+                continue
+            have = {c["name"] for c in insp.get_columns(table)}
+            for name, ddl in cols:
+                if name not in have:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {ddl}"))
 
 
 def get_session() -> Iterator[Session]:

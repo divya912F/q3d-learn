@@ -20,7 +20,7 @@ export function decodeCircuit(s) {
 export async function render(root, { query }) {
   if (query.get('c')) {
     try { store.set('circuit', decodeCircuit(query.get('c'))); toast('Loaded shared circuit', 'success'); } catch { toast('Invalid share link', 'error'); }
-    history.replaceState(null, '', '#/builder');
+    history.replaceState(null, '', '#/c/quantum/lab/builder');
   }
   const algs = await api.algorithms().catch(() => []);
   root.innerHTML = `
@@ -103,7 +103,7 @@ export async function render(root, { query }) {
     e.target.value = '';
   });
   $('[data-share]').addEventListener('click', async () => {
-    const url = `${location.origin}${location.pathname}#/builder?c=${encodeCircuit(editor.circuit)}`;
+    const url = `${location.origin}${location.pathname}#/c/quantum/lab/builder?c=${encodeCircuit(editor.circuit)}`;
     try { await navigator.clipboard.writeText(url); toast('Share link copied to clipboard', 'success'); } catch { prompt('Copy this link:', url); }
   });
 

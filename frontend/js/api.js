@@ -37,14 +37,17 @@ export const api = {
   algorithms: () => request('GET', '/api/algorithms'),
   algorithm: (id) => request('GET', `/api/algorithms/${id}`),
 
-  lessons: () => request('GET', '/api/lessons'),
-  lesson: (id) => request('GET', `/api/lessons/${id}`),
-  completeLesson: (user_id, lesson_id) => request('POST', '/api/lessons/complete', { user_id, lesson_id }),
-  submitQuiz: (id, answers, user_id) => request('POST', `/api/lessons/${id}/quiz`, { answers, user_id }),
-  challenges: () => request('GET', '/api/challenges'),
-  checkChallenge: (id, circuit, user_id) => request('POST', `/api/challenges/${id}/check`, { ...circuit, user_id }),
+  courses: () => request('GET', '/api/courses'),
+  course: (cid) => request('GET', `/api/courses/${cid}`),
+  lessons: (cid) => request('GET', `/api/courses/${cid}/lessons`),
+  lesson: (cid, id) => request('GET', `/api/courses/${cid}/lessons/${id}`),
+  submitQuiz: (cid, id, answers, user_id) => request('POST', `/api/courses/${cid}/lessons/${id}/quiz`, { answers, user_id }),
+  challenges: (cid) => request('GET', `/api/courses/${cid}/challenges`),
+  checkChallenge: (cid, id, payload, user_id) => request('POST', `/api/courses/${cid}/challenges/${id}/check`, { ...payload, user_id }),
 
-  progress: (uid) => request('GET', `/api/progress/${uid}`),
+  lab: (path, config, user_id) => request('POST', `/api/${path}`, { config, user_id }),
+
+  progress: (uid, course) => request('GET', `/api/progress/${uid}${course ? `?course=${course}` : ''}`),
   saveCircuit: (body) => request('POST', '/api/circuits', body),
   circuits: (uid) => request('GET', `/api/circuits/user/${uid}`),
   deleteCircuit: (id, uid) => request('DELETE', `/api/circuits/${id}?user_id=${uid}`),
@@ -57,6 +60,6 @@ export const api = {
   createClassroom: (name, instructor_id) => request('POST', '/api/classrooms', { name, instructor_id }),
   myClassrooms: (uid) => request('GET', `/api/classrooms/instructor/${uid}`),
   demoClassroom: (uid) => request('POST', `/api/classrooms/demo${uid ? `?instructor_id=${uid}` : ''}`),
-  overview: (code) => request('GET', `/api/classrooms/${encodeURIComponent(code)}/overview`),
+  overview: (code, course = 'all') => request('GET', `/api/classrooms/${encodeURIComponent(code)}/overview?course=${course}`),
   addAssignment: (code, body) => request('POST', `/api/classrooms/${encodeURIComponent(code)}/assignments`, body),
 };

@@ -19,24 +19,46 @@ import urllib.request
 from typing import Any
 
 from ..config import settings
-from ..content.challenges import get_challenge
-from ..content.lessons import get_lesson
+from ..courses import registry as R
 from ..quantum.gates import GATES
 from ..quantum.simulator import run_circuit
-from .knowledge import CONCEPTS, find_concepts
 
 log = logging.getLogger(__name__)
 
-SYSTEM_PROMPT = """You are Q-Bot, the friendly AI tutor inside Q-3D Learn, an interactive quantum-computing learning platform for students.
+SYSTEM_PROMPT = """You are Q-Bot, the friendly AI study buddy inside Q-3D Learn, an interactive learning platform with courses in
+Quantum Computing, Machine Learning, Data Science and Artificial Intelligence.
 
 Rules:
-- Explain clearly for a beginner-to-intermediate student. Prefer intuition first, then the math.
-- Keep answers under ~180 words unless the student asks for more depth. Use short paragraphs or bullet points and Unicode kets like |0⟩, |+⟩.
-- The SIMULATION FACTS section is computed by an exact simulator and is authoritative. Never contradict it and never invent numbers that are not in it.
-- If the student asks about their circuit, reference the actual gates and results. If something looks wrong, give a hint rather than the full solution for challenges.
+- Explain clearly for a beginner-to-intermediate student. Prefer intuition first, then the maths.
+- Keep answers under ~180 words unless the student asks for more depth. Use short paragraphs or bullet points.
+- The FACTS section is computed by the platform's own simulators and engines and is authoritative. Never contradict it
+  and never invent numbers that are not in it.
+- If the student asks about their circuit, model or lab result, reference the actual settings and results.
+- For challenges, give hints rather than the full solution.
 - If you are not sure about something, say so. Do not make up references.
-- Mention the 3D Bloch sphere or the step-through slider when it helps the student *see* the idea.
+- Point to the visual labs (3D Bloch sphere, decision boundaries, loss landscape, search animation…) when it helps the student *see* the idea.
 """
+
+COURSE_HELP = {
+    "quantum": "superposition, the Bloch sphere, gates, measurement, entanglement, Grover, Deutsch–Jozsa… or *“What happens when I apply H to |0⟩?”*",
+    "ml": "gradient descent, learning rates, decision boundaries, k-NN, decision trees, neural networks, k-means, overfitting…",
+    "ds": "mean vs. median, standard deviation, which chart to use, correlation vs. causation, missing values, outliers, the CLT…",
+    "ai": "BFS vs. DFS, A* and heuristics, minimax and alpha–beta, Q-learning, temperature in language models, responsible AI…",
+}
+
+
+def find_concepts(question: str, course: str | None = None) -> list[tuple[str, dict]]:
+    """Concepts whose keywords appear in the question — current course first, then the others."""
+    q = f" {question.lower()} "
+    order = ([course] if course in R.course_ids() else []) + [c for c in R.course_ids() if c != course]
+    hits: list[tuple[str, dict]] = []
+    for cid in order:
+        for cid_key, c in R.knowledge(cid).items():
+            if any(k in q for k in c["keys"]):
+                hits.append((cid, c))
+        if hits and cid == course:
+            break  # prefer the course the learner is studying
+    return hits
 
 STATE_WORDS = {
     "|0>": "0", "|0⟩": "0", "|1>": "1", "|1⟩": "1", "|+>": "+", "|+⟩": "+", "|->": "-", "|−⟩": "-", "|-⟩": "-",
@@ -152,24 +174,44 @@ def _gate_on_state(question: str) -> str | None:
     )
 
 
-def offline_answer(question: str, circuit: dict | None, result: dict | None, lesson: dict | None, challenge: dict | None) -> str:
+def _lab_answer(lab: dict, concepts: list[tuple[str, dict]]) -> str:
+    parts = [f"Here is what your **{lab.get('title') or lab['lab']}** run shows:"]
+    parts.append("\n".join(f"- {f}" for f in lab.get("facts", [])[:10]))
+    if concepts:
+        parts.append(concepts[0][1]["text"])
+    parts.append("Change one setting at a time and re-run — comparing two runs is the fastest way to build intuition.")
+    return "\n\n".join(parts)
+
+
+def offline_answer(question: str, circuit: dict | None, result: dict | None, lesson: dict | None, challenge: dict | None,
+                   course: str | None = None, lab: dict | None = None) -> str:
     q = question.lower()
-    concepts = find_concepts(question)
+    concepts = find_concepts(question, course)
     parts: list[str] = []
 
     if challenge and any(w in q for w in ("hint", "stuck", "help", "how do i", "challenge", "solve")):
         parts.append(f"**Hint for “{challenge['title']}”:** {challenge['hint']}")
-        if result:
+        if result and challenge.get("target_label"):
             parts.append(f"Right now your circuit prepares {result['analysis']['ket']} — compare it with the target {challenge['target_label']}.")
+        elif challenge.get("goal"):
+            parts.append(f"Goal: {challenge['goal']}")
+        if lab and lab.get("facts"):
+            parts.append("Your latest run: " + "; ".join(lab["facts"][:4]) + ".")
         return "\n\n".join(parts)
 
-    direct = _gate_on_state(question)
-    if direct:
-        return direct
+    if course in (None, "quantum"):
+        direct = _gate_on_state(question)
+        if direct:
+            return direct
+
+    lab_words = ("my model", "my result", "my run", "this run", "this result", "the result", "my data", "this chart", "my chart",
+                 "the lab", "my lab", "latest", "my agent", "my path", "my pipeline", "this graph", "my experiment")
+    if lab and lab.get("facts") and (any(w in q for w in lab_words) or not concepts):
+        return _lab_answer(lab, concepts)
 
     circuit_words = ("my circuit", "this circuit", "the circuit", "my state", "this state", "my qubit", "result",
                      "output", "histogram", "wrong", "debug", "gates i applied", "step by step")
-    about_circuit = bool(circuit and circuit.get("operations")) and (
+    about_circuit = course in (None, "quantum") and bool(circuit and circuit.get("operations")) and (
         any(w in q for w in circuit_words)
         or (not concepts and any(w in q for w in ("explain", "what happen", "why", "what is going on")))
         or not concepts
@@ -192,26 +234,25 @@ def offline_answer(question: str, circuit: dict | None, result: dict | None, les
             parts.append("**Things to check:** " + " ".join(result["warnings"]))
         parts.append("Tip: drag the step slider under the results to watch the state evolve gate by gate.")
         if concepts:
-            parts.append(CONCEPTS[concepts[0]]["text"])
+            parts.append(concepts[0][1]["text"])
         return "\n\n".join(parts)
 
     if concepts:
-        for c in concepts[:2]:
-            parts.append(CONCEPTS[c]["text"])
-        lesson_id = CONCEPTS[concepts[0]].get("lesson")
-        if lesson_id:
-            l = get_lesson(lesson_id)
+        for _, c in concepts[:2]:
+            parts.append(c["text"])
+        if lab and lab.get("facts"):
+            parts.append(f"In your current {lab.get('title') or 'lab'} run: " + "; ".join(lab["facts"][:3]) + ".")
+        cid, first = concepts[0]
+        if first.get("lesson"):
+            _, l = R.find_lesson(first["lesson"])
             if l:
-                parts.append(f"📘 Want more? Open the lesson **{l['title']}** in *Learn*.")
+                parts.append(f"📘 Want more? Open the lesson **{l['title']}** in the {R.course(cid)['title']} course.")
         return "\n\n".join(parts)
 
     if lesson:
         parts.append(f"We're on **{lesson['title']}** — {lesson['summary']}")
-    parts.append(
-        "I'm Q-Bot, running in offline mode. I can explain concepts (superposition, the Bloch sphere, gates, measurement, "
-        "entanglement, interference, Grover, Deutsch–Jozsa…), walk through **your current circuit and its results**, "
-        "or answer things like *“What happens when I apply H to |0⟩?”*."
-    )
+    topic_help = COURSE_HELP.get(course or "", "any of the four courses — quantum, machine learning, data science or AI")
+    parts.append(f"I'm Q-Bot, running in offline mode. Ask me about {topic_help}. I can also explain **your latest lab result**.")
     parts.append("Add an OpenAI or Gemini API key in `.env` to unlock free-form answers.")
     return "\n\n".join(parts)
 
@@ -257,7 +298,17 @@ def active_provider() -> str:
     return "offline"
 
 
-def suggestions(circuit: dict | None, result: dict | None, concepts: list[str]) -> list[str]:
+FOLLOW_UPS = {
+    "ml": ["Why did my model overfit?", "What does the learning rate do?", "How does a neural network learn?"],
+    "ds": ["When should I use the median?", "Is correlation causation?", "How do I handle missing values?"],
+    "ai": ["Why is A* faster than BFS?", "What does epsilon do in Q-learning?", "What does temperature change?"],
+}
+
+
+def suggestions(circuit: dict | None, result: dict | None, concepts: list, course: str | None = None, lab: dict | None = None) -> list[str]:
+    if course in FOLLOW_UPS:
+        out = (["Explain my latest lab result"] if lab and lab.get("facts") else []) + FOLLOW_UPS[course]
+        return out[:3]
     out = []
     if circuit and circuit.get("operations"):
         out.append("Explain my circuit step by step")
@@ -268,9 +319,14 @@ def suggestions(circuit: dict | None, result: dict | None, concepts: list[str]) 
     else:
         out.append("What happens when I apply H to |0⟩?")
     related = {"superposition": "What is interference?", "entanglement": "Can entanglement send messages?", "bloch": "What do θ and φ mean?"}
-    for c in concepts:
-        if c in related:
-            out.append(related[c])
+    for _, c in concepts:
+        key = c.get("lesson")
+        if key == "qubits":
+            out.append(related["superposition"])
+        elif key == "entanglement":
+            out.append(related["entanglement"])
+        elif key == "bloch":
+            out.append(related["bloch"])
     out.append("What is measurement?")
     seen, uniq = set(), []
     for s in out:
@@ -281,16 +337,22 @@ def suggestions(circuit: dict | None, result: dict | None, concepts: list[str]) 
 
 
 def ask(question: str, circuit: dict | None = None, result: dict | None = None, history: list[dict] | None = None,
-        lesson_id: str | None = None, challenge_id: str | None = None) -> dict[str, Any]:
-    lesson = get_lesson(lesson_id) if lesson_id else None
-    challenge = get_challenge(challenge_id) if challenge_id else None
+        lesson_id: str | None = None, challenge_id: str | None = None, course: str | None = None, lab: dict | None = None) -> dict[str, Any]:
+    lesson = R.find_lesson(lesson_id)[1] if lesson_id else None
+    cid, challenge = R.find_challenge(challenge_id) if challenge_id else (None, None)
+    course = course if course in R.course_ids() else cid
+    if course not in (None, "quantum"):
+        circuit = None  # the quantum circuit is irrelevant outside the quantum course
     result, facts = simulation_facts(circuit, result)
-    concepts = find_concepts(question)
+    if lab and lab.get("facts"):
+        facts = facts + [f"[{lab.get('title') or lab['lab']}] {f}" for f in lab["facts"][:20]]
+    concepts = find_concepts(question, course)
     provider = active_provider()
     notice = None
 
     if provider != "offline":
-        context = ["SIMULATION FACTS (authoritative):", *(f"- {f}" for f in facts)] if facts else ["No circuit is loaded."]
+        context = [f"The student is in the {R.course(course)['title']} course." if course else "The student is browsing all courses."]
+        context += ["FACTS (authoritative, computed by the platform):", *(f"- {f}" for f in facts)] if facts else ["No circuit or lab result is loaded."]
         if lesson:
             context.append(f"The student is studying the lesson '{lesson['title']}': {lesson['summary']}")
         if challenge:
@@ -299,7 +361,7 @@ def ask(question: str, circuit: dict | None = None, result: dict | None = None, 
                 f"Give hints, not the full answer. Official hint: {challenge['hint']}"
             )
         if concepts:
-            context.append("VALIDATED REFERENCE NOTES:\n" + "\n".join(CONCEPTS[c]["text"] for c in concepts[:3]))
+            context.append("VALIDATED REFERENCE NOTES:\n" + "\n".join(c["text"] for _, c in concepts[:3]))
         messages = [{"role": "system", "content": SYSTEM_PROMPT + "\n\n" + "\n".join(context)}]
         for h in (history or [])[-8:]:
             if h.get("role") in ("user", "assistant") and h.get("content"):
@@ -307,16 +369,16 @@ def ask(question: str, circuit: dict | None = None, result: dict | None = None, 
         messages.append({"role": "user", "content": question})
         try:
             answer = _openai(messages) if provider == "openai" else _gemini(messages)
-            return {"answer": answer, "provider": provider, "facts": facts, "suggestions": suggestions(circuit, result, concepts)}
+            return {"answer": answer, "provider": provider, "facts": facts, "suggestions": suggestions(circuit, result, concepts, course, lab)}
         except (urllib.error.URLError, KeyError, IndexError, TimeoutError, ValueError) as exc:
             log.warning("AI provider %s failed, falling back to offline tutor: %s", provider, exc)
             notice = f"The {provider} API could not be reached, so the offline tutor answered."
 
-    answer = offline_answer(question, circuit, result, lesson, challenge)
+    answer = offline_answer(question, circuit, result, lesson, challenge, course, lab)
     return {
         "answer": answer,
         "provider": "offline",
         "facts": facts,
-        "suggestions": suggestions(circuit, result, concepts),
+        "suggestions": suggestions(circuit, result, concepts, course, lab),
         "notice": notice,
     }

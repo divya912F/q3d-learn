@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from ..ai import tutor
+from ..courses import registry as R
 from ..database import Assignment, Classroom, TutorMessage, User, get_session
 from ..schemas import AssignmentCreate, ClassroomCreate, TutorRequest, UserCreate
 from ..services.demo import seed_demo_classroom
@@ -60,8 +61,9 @@ def tutor_status() -> dict:
 @router.post("/tutor/ask")
 async def tutor_ask(req: TutorRequest, db: Session = Depends(get_session)) -> dict:
     circuit = req.circuit.model_dump() if req.circuit else None
+    lab = req.lab.model_dump() if req.lab else None
     answer = await run_in_threadpool(
-        tutor.ask, req.question, circuit, req.result, req.history, req.lesson_id, req.challenge_id
+        tutor.ask, req.question, circuit, req.result, req.history, req.lesson_id, req.challenge_id, req.course, lab
     )
     if req.user_id and db.get(User, req.user_id):
         db.add(TutorMessage(user_id=req.user_id, question=req.question[:2000], provider=answer["provider"]))
@@ -103,16 +105,19 @@ def demo_classroom(instructor_id: int | None = None, db: Session = Depends(get_s
 
 
 @router.get("/classrooms/{code}/overview")
-def overview(code: str, db: Session = Depends(get_session)) -> dict:
+def overview(code: str, course: str = "all", db: Session = Depends(get_session)) -> dict:
     code = code.upper()
     room = db.scalar(select(Classroom).where(Classroom.code == code))
     if not room:
         raise HTTPException(404, "Classroom not found")
-    data = classroom_overview(db, code)
-    assignments = db.scalars(select(Assignment).where(Assignment.classroom_id == room.id).order_by(Assignment.created_at)).all()
+    data = classroom_overview(db, code, course)
+    q = select(Assignment).where(Assignment.classroom_id == room.id)
+    if data["course"] != "all":
+        q = q.where(Assignment.course == data["course"])
+    assignments = db.scalars(q.order_by(Assignment.created_at)).all()
     data["classroom"] = {"code": room.code, "name": room.name}
     data["assignments"] = [
-        {"id": a.id, "title": a.title, "item_type": a.item_type, "item_id": a.item_id, "due": a.due,
+        {"id": a.id, "title": a.title, "course": a.course, "item_type": a.item_type, "item_id": a.item_id, "due": a.due,
          "completion": assignment_completion(a, data["students"])}
         for a in assignments
     ]
@@ -124,7 +129,10 @@ def add_assignment(code: str, body: AssignmentCreate, db: Session = Depends(get_
     room = db.scalar(select(Classroom).where(Classroom.code == code.upper()))
     if not room:
         raise HTTPException(404, "Classroom not found")
-    a = Assignment(classroom_id=room.id, title=body.title, item_type=body.item_type, item_id=body.item_id, due=body.due)
+    cid = R.find_lesson(body.item_id)[0] if body.item_type == "lesson" else R.find_challenge(body.item_id)[0]
+    if not cid:
+        raise HTTPException(404, f"Unknown {body.item_type} '{body.item_id}'")
+    a = Assignment(classroom_id=room.id, course=cid, title=body.title, item_type=body.item_type, item_id=body.item_id, due=body.due)
     db.add(a)
     db.commit()
     return {"id": a.id}
@@ -136,4 +144,4 @@ def list_assignments(code: str, db: Session = Depends(get_session)) -> list[dict
     if not room:
         raise HTTPException(404, "Classroom not found")
     rows = db.scalars(select(Assignment).where(Assignment.classroom_id == room.id)).all()
-    return [{"id": a.id, "title": a.title, "item_type": a.item_type, "item_id": a.item_id, "due": a.due} for a in rows]
+    return [{"id": a.id, "title": a.title, "course": a.course, "item_type": a.item_type, "item_id": a.item_id, "due": a.due} for a in rows]

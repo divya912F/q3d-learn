@@ -3,8 +3,14 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { esc, icon, markdown, toast, initials, hydrateIcons } from '../ui.js';
 
-const WELCOME = "Hi! I'm **Q-Bot**, your quantum tutor. Ask me about any concept, or about the circuit you're building — I can see your current circuit and its *real* simulation results, so my explanations stay grounded.";
-const STARTERS = ['What happens when I apply H to |0⟩?', 'What is entanglement?', 'Explain my circuit step by step'];
+const WELCOME = "Hi! I'm **Q-Bot**, your study buddy for Quantum Computing, Machine Learning, Data Science and AI. Ask me about any concept — or about the lab you're using: I can see your circuit, model or experiment and its *real* results, so my explanations stay grounded.";
+const STARTERS_BY_COURSE = {
+  quantum: ['What happens when I apply H to |0⟩?', 'What is entanglement?', 'Explain my circuit step by step'],
+  ml: ['What does the learning rate do?', 'Explain my latest lab result', 'What is overfitting?'],
+  ds: ['When should I use the median?', 'Is correlation causation?', 'Explain my latest lab result'],
+  ai: ['Why is A* faster than BFS?', 'What does epsilon do in Q-learning?', 'Explain my latest lab result'],
+};
+const STARTERS = ['What is machine learning?', 'What is a qubit?', 'How does A* search work?'];
 
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -25,7 +31,7 @@ export class Chat {
     this.root = root;
     this.compact = compact;
     this.busy = false;
-    this.suggestions = STARTERS;
+    this.suggestions = STARTERS_BY_COURSE[store.currentCourse] || STARTERS;
     root.innerHTML = `<div class="chat">
       <div class="chat-log" data-log aria-live="polite"></div>
       <div class="chat-suggest" data-suggest></div>
@@ -108,14 +114,15 @@ export class Chat {
     store.set('chat', [...store.chat, { role: 'user', content: question }]);
     this.busy = true;
     this.renderLog();
-    // In the 3D Lab the tutor discusses the lab qubit; elsewhere, the builder circuit.
+    // Quantum: in the 3D Lab the tutor discusses the lab qubit; elsewhere, the builder circuit.
+    const course = store.currentCourse;
     const src = store.labCircuit?.operations?.length ? store.labCircuit : store.circuit;
-    const circuit = src?.operations?.length ? src : null;
+    const circuit = (course === 'quantum' || !course) && src?.operations?.length ? src : null;
     try {
       const res = await api.ask({
         question, circuit, history,
         lesson_id: store.context.lesson_id, challenge_id: store.context.challenge_id,
-        user_id: store.user?.id,
+        user_id: store.user?.id, course, lab: store.labContext || undefined,
       });
       this.busy = false;
       store.set('chat', [...store.chat, { role: 'assistant', content: res.answer, provider: res.provider, facts: res.facts, notice: res.notice }]);

@@ -42,22 +42,22 @@ def test_simulate_rejects_bad_circuit(client):
 
 
 def test_lessons_hide_answers(client):
-    lesson = client.get("/api/lessons/qubits").json()
+    lesson = client.get("/api/courses/quantum/lessons/qubits").json()
     assert all("answer" not in q for q in lesson["quiz"])
 
 
 def test_quiz_progress_and_recommendations(client, user):
-    graded = client.post("/api/lessons/qubits/quiz", json={"user_id": user["id"], "answers": [1, 2, 1]}).json()
+    graded = client.post("/api/courses/quantum/lessons/qubits/quiz", json={"user_id": user["id"], "answers": [1, 2, 1]}).json()
     assert graded["score"] == 3
     p = client.get(f"/api/progress/{user['id']}").json()
-    assert "qubits" in p["lessons_completed"]
+    assert "qubits" in p["courses"]["quantum"]["lessons_completed"]
     assert p["experiments"] >= 1
     assert p["xp"] > 0
     assert p["recommendations"]
 
 
 def test_challenge(client, user):
-    r = client.post("/api/challenges/bell/check", json={**BELL, "user_id": user["id"]}).json()
+    r = client.post("/api/courses/quantum/challenges/bell/check", json={**BELL, "user_id": user["id"]}).json()
     assert r["solved"] and r["points"] == 100
 
 
@@ -81,7 +81,7 @@ def test_classroom_flow(client):
     teacher = client.post("/api/users", json={"name": "Prof", "role": "instructor"}).json()
     room = client.post("/api/classrooms", json={"name": "QC 101", "instructor_id": teacher["id"]}).json()
     student = client.post("/api/users", json={"name": "Stu", "classroom_code": room["code"]}).json()
-    client.post("/api/challenges/coin/check", json={"num_qubits": 1, "operations": [{"name": "h", "qubits": [0]}], "user_id": student["id"]})
+    client.post("/api/courses/quantum/challenges/coin/check", json={"num_qubits": 1, "operations": [{"name": "h", "qubits": [0]}], "user_id": student["id"]})
     client.post(f"/api/classrooms/{room['code']}/assignments", json={"title": "Coin", "item_type": "challenge", "item_id": "coin"})
     o = client.get(f"/api/classrooms/{room['code']}/overview").json()
     assert o["totals"]["students"] == 1
@@ -91,7 +91,9 @@ def test_classroom_flow(client):
 def test_demo_classroom(client):
     assert client.post("/api/classrooms/demo").json()["code"] == "DEMO42"
     o = client.get("/api/classrooms/DEMO42/overview").json()
-    assert o["totals"]["students"] == 10
+    assert o["totals"]["students"] == 12
+    ml = client.get("/api/classrooms/DEMO42/overview?course=ml").json()
+    assert set(ml["columns"]) == {"foundations", "regression", "classification", "trees", "neural", "clustering", "evaluation"}
 
 
 def test_saved_circuits(client, user):

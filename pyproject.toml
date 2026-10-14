@@ -1,7 +1,7 @@
 [project]
 name = "q3d-learn"
-version = "1.0.0"
-description = "AI-powered interactive quantum learning platform with 3D visualisation, real simulation and an AI tutor."
+version = "2.0.0"
+description = "AI-powered visual study platform: Quantum Computing, Machine Learning, Data Science and AI courses with interactive labs and an AI tutor."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.10"

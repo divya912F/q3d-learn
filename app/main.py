@@ -13,7 +13,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .api import community, learning, quantum
+from .api import community, labs, learning, quantum
 from .config import settings
 from .database import init_db
 
@@ -30,8 +30,8 @@ def create_app() -> FastAPI:
     app = FastAPI(
         title="Q-3D Learn API",
         version=settings.version,
-        description="AI-powered interactive quantum learning platform: simulation, 3D visualisation data, "
-        "lessons, challenges, AI tutor and learning analytics.",
+        description="AI-powered interactive learning platform with courses in Quantum Computing, Machine Learning, "
+        "Data Science and AI: visual labs, simulations, lessons, challenges, an AI tutor and learning analytics.",
         lifespan=lifespan,
     )
     app.add_middleware(GZipMiddleware, minimum_size=1024)
@@ -44,6 +44,7 @@ def create_app() -> FastAPI:
     app.include_router(quantum.router)
     app.include_router(learning.router)
     app.include_router(community.router)
+    app.include_router(labs.router)
 
     @app.get("/api/health", tags=["system"])
     def health() -> dict:

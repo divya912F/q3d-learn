@@ -17,16 +17,16 @@ export async function render(root, { params }) {
         <h3>${esc(a.title)}</h3><p class="muted small">${esc(a.summary)}</p>
         <div class="faint tiny">Expected: <span class="mono">${esc(a.expected)}</span></div></div>`).join('')}</div>`;
     root.querySelectorAll('[data-id]').forEach((c) => {
-      c.addEventListener('click', () => navigate(`/algorithms/${c.dataset.id}`));
-      c.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigate(`/algorithms/${c.dataset.id}`); });
+      c.addEventListener('click', () => navigate(`/c/quantum/lab/algorithms/${c.dataset.id}`));
+      c.addEventListener('keydown', (e) => { if (e.key === 'Enter') navigate(`/c/quantum/lab/algorithms/${c.dataset.id}`); });
     });
     return undefined;
   }
 
   const a = await api.algorithm(params[0]).catch(() => null);
-  if (!a) { navigate('/algorithms'); return undefined; }
+  if (!a) { navigate('/c/quantum/lab/algorithms'); return undefined; }
   root.innerHTML = `
-    <div class="row" style="margin-bottom:14px"><a href="#/algorithms" class="btn btn-ghost btn-sm">← All algorithms</a></div>
+    <div class="row" style="margin-bottom:14px"><a href="#/c/quantum/lab/algorithms" class="btn btn-ghost btn-sm">← All algorithms</a></div>
     <div class="alg-layout">
       <div class="stack">
         <div class="card">

@@ -1,4 +1,4 @@
-"""Learning analytics: XP, topic mastery, recommendations and instructor overviews."""
+"""Learning analytics across courses: XP, per-course topic mastery, recommendations and class overviews."""
 from __future__ import annotations
 
 from collections import defaultdict
@@ -7,14 +7,13 @@ from datetime import datetime, timedelta, timezone
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from ..content.challenges import CHALLENGES
-from ..content.lessons import LESSONS, TOPICS
+from ..courses import registry as R
 from ..database import Assignment, ChallengeAttempt, Experiment, LessonProgress, QuizResult, TutorMessage, User
 
 XP_LESSON = 50
 XP_PER_CORRECT = 10
 XP_EXPERIMENT = 2
-XP_EXPERIMENT_CAP = 100
+XP_EXPERIMENT_CAP = 100  # per course
 XP_PER_LEVEL = 250
 
 
@@ -22,153 +21,169 @@ def _aware(dt: datetime) -> datetime:
     return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
 
 
+def _avg(vals: list[float]) -> int | None:
+    return round(sum(vals) / len(vals)) if vals else None
+
+
 def user_stats(db: Session, user: User) -> dict:
-    lessons_done = set(db.scalars(select(LessonProgress.lesson_id).where(LessonProgress.user_id == user.id)))
+    lessons_rows = db.scalars(select(LessonProgress).where(LessonProgress.user_id == user.id)).all()
     quizzes = db.scalars(select(QuizResult).where(QuizResult.user_id == user.id)).all()
     attempts = db.scalars(select(ChallengeAttempt).where(ChallengeAttempt.user_id == user.id)).all()
-    experiments = db.scalars(
-        select(Experiment).where(Experiment.user_id == user.id).order_by(Experiment.created_at.desc())
-    ).all()
+    experiments = db.scalars(select(Experiment).where(Experiment.user_id == user.id).order_by(Experiment.created_at.desc())).all()
     questions = db.scalar(select(func.count()).select_from(TutorMessage).where(TutorMessage.user_id == user.id)) or 0
 
-    best_quiz: dict[str, QuizResult] = {}
-    for q in quizzes:
-        if q.lesson_id not in best_quiz or q.percent > best_quiz[q.lesson_id].percent:
-            best_quiz[q.lesson_id] = q
+    courses: dict[str, dict] = {}
+    total_xp = 0
+    for cid in R.course_ids():
+        done = {l.lesson_id for l in lessons_rows if (l.course or "quantum") == cid}
+        best: dict[str, QuizResult] = {}
+        for q in quizzes:
+            if (q.course or "quantum") != cid:
+                continue
+            if q.lesson_id not in best or q.percent > best[q.lesson_id].percent:
+                best[q.lesson_id] = q
+        solved: dict[str, ChallengeAttempt] = {}
+        attempted: set[str] = set()
+        for a in attempts:
+            if (a.course or "quantum") != cid:
+                continue
+            attempted.add(a.challenge_id)
+            if a.solved and a.challenge_id not in solved:
+                solved[a.challenge_id] = a
+        exps = [e for e in experiments if (e.course or "quantum") == cid]
+        xp = (XP_LESSON * len(done) + XP_PER_CORRECT * sum(q.score for q in best.values()) + sum(a.points for a in solved.values())
+              + min(XP_EXPERIMENT_CAP, XP_EXPERIMENT * len(exps)))
+        total_xp += xp
 
-    solved: dict[str, ChallengeAttempt] = {}
-    attempted: set[str] = set()
-    for a in attempts:
-        attempted.add(a.challenge_id)
-        if a.solved and a.challenge_id not in solved:
-            solved[a.challenge_id] = a
-
-    xp = (
-        XP_LESSON * len(lessons_done)
-        + XP_PER_CORRECT * sum(q.score for q in best_quiz.values())
-        + sum(a.points for a in solved.values())
-        + min(XP_EXPERIMENT_CAP, XP_EXPERIMENT * len(experiments))
-    )
-
-    # Topic mastery: average best-quiz percentage, nudged by challenge outcomes.
-    topic_scores: dict[str, list[float]] = defaultdict(list)
-    for q in best_quiz.values():
-        topic_scores[q.topic].append(q.percent)
-    for cid in attempted:
-        ch = next((c for c in CHALLENGES if c["id"] == cid), None)
-        if ch:
-            topic_scores[ch["topic"]].append(100.0 if cid in solved else 40.0)
-    mastery = {t: (round(sum(v) / len(v)) if (v := topic_scores.get(t)) else None) for t in TOPICS}
-    weak = [t for t, m in mastery.items() if m is not None and m < 70]
+        topic_scores: dict[str, list[float]] = defaultdict(list)
+        for q in best.values():
+            topic_scores[q.topic].append(q.percent)
+        for chid in attempted:
+            ch = R.challenge(cid, chid)
+            if ch:
+                topic_scores[ch["topic"]].append(100.0 if chid in solved else 40.0)
+        mastery = {t: _avg(topic_scores.get(t, [])) for t in R.topics(cid)}
+        lessons_total = len(R.lessons(cid))
+        challenges_total = len(R.challenges(cid))
+        progress_pct = round(100 * (len(done) + len(solved)) / max(1, lessons_total + challenges_total))
+        courses[cid] = {
+            "lessons_completed": [l["id"] for l in R.lessons(cid) if l["id"] in done],
+            "lessons_total": lessons_total,
+            "quiz_best": {k: {"score": v.score, "total": v.total, "percent": v.percent} for k, v in best.items()},
+            "challenges_solved": sorted(solved), "challenges_total": challenges_total,
+            "experiments": len(exps), "mastery": mastery,
+            "weak_topics": [t for t, m in mastery.items() if m is not None and m < 70],
+            "xp": xp, "progress_pct": progress_pct,
+            "avg_quiz": _avg([q.percent for q in best.values()]),
+            "overall_mastery": _avg([m for m in mastery.values() if m is not None]),
+            "started": bool(done or best or attempted or exps),
+        }
 
     now = datetime.now(timezone.utc)
-    activity = defaultdict(int)
-    stamps = (
-        [_aware(e.created_at) for e in experiments]
-        + [_aware(q.created_at) for q in quizzes]
-        + [_aware(a.created_at) for a in attempts]
-    )
+    stamps = [_aware(e.created_at) for e in experiments] + [_aware(q.created_at) for q in quizzes] + [_aware(a.created_at) for a in attempts]
+    per_day: dict[str, int] = defaultdict(int)
     for ts in stamps:
-        day = (now - ts).days
-        if 0 <= day < 14:
-            activity[(now - timedelta(days=day)).date().isoformat()] += 1
-    activity_series = [
-        {"date": (now - timedelta(days=d)).date().isoformat(), "count": activity.get((now - timedelta(days=d)).date().isoformat(), 0)}
-        for d in range(13, -1, -1)
-    ]
+        d = (now - ts).days
+        if 0 <= d < 14:
+            per_day[(now - timedelta(days=d)).date().isoformat()] += 1
+    activity = [{"date": (now - timedelta(days=d)).date().isoformat(), "count": per_day.get((now - timedelta(days=d)).date().isoformat(), 0)}
+                for d in range(13, -1, -1)]
+    # study streak: consecutive days with activity ending today/yesterday
+    streak = 0
+    for d in range(0, 60):
+        day = (now - timedelta(days=d)).date()
+        if any(_aware(ts).date() == day for ts in stamps):
+            streak += 1
+        elif d > 0:
+            break
     last_active = max(stamps) if stamps else _aware(user.created_at)
-
     return {
         "user": {"id": user.id, "name": user.name, "role": user.role, "classroom_code": user.classroom_code},
-        "xp": xp,
-        "level": xp // XP_PER_LEVEL + 1,
-        "level_progress": round(100 * (xp % XP_PER_LEVEL) / XP_PER_LEVEL),
-        "lessons_completed": sorted(lessons_done, key=lambda lid: next((l["order"] for l in LESSONS if l["id"] == lid), 99)),
-        "lessons_total": len(LESSONS),
-        "quiz_best": {k: {"score": v.score, "total": v.total, "percent": v.percent} for k, v in best_quiz.items()},
-        "quiz_history": [
-            {"lesson_id": q.lesson_id, "percent": q.percent, "date": _aware(q.created_at).isoformat()}
-            for q in sorted(quizzes, key=lambda q: _aware(q.created_at))
-        ][-20:],
-        "challenges_solved": sorted(solved),
-        "challenges_total": len(CHALLENGES),
+        "xp": total_xp, "level": total_xp // XP_PER_LEVEL + 1, "level_progress": round(100 * (total_xp % XP_PER_LEVEL) / XP_PER_LEVEL),
+        "courses": courses,
         "experiments": len(experiments),
-        "recent_experiments": [
-            {"num_qubits": e.num_qubits, "gate_count": e.gate_count, "depth": e.depth, "backend": e.backend,
-             "state": e.state_name, "date": _aware(e.created_at).isoformat()}
-            for e in experiments[:8]
-        ],
-        "questions_asked": questions,
-        "mastery": mastery,
-        "weak_topics": weak,
-        "activity": activity_series,
-        "last_active": last_active.isoformat(),
+        "recent_experiments": [{"course": e.course or "quantum", "lab": e.lab, "num_qubits": e.num_qubits, "gate_count": e.gate_count,
+                                "depth": e.depth, "backend": e.backend, "state": e.state_name, "date": _aware(e.created_at).isoformat()}
+                               for e in experiments[:10]],
+        "questions_asked": questions, "activity": activity, "streak": streak, "last_active": last_active.isoformat(),
+        "lessons_completed_total": sum(len(c["lessons_completed"]) for c in courses.values()),
+        "challenges_solved_total": sum(len(c["challenges_solved"]) for c in courses.values()),
     }
 
 
-def recommendations(stats: dict) -> list[dict]:
+def recommendations(stats: dict, course: str | None = None) -> list[dict]:
     recs: list[dict] = []
-    done = set(stats["lessons_completed"])
-    for t in stats["weak_topics"]:
-        lesson = next((l for l in LESSONS if l["topic"] == t), None)
-        if lesson:
-            recs.append({"type": "lesson", "id": lesson["id"], "title": f"Review: {lesson['title']}",
-                         "reason": f"Your {TOPICS[t].lower()} score is {stats['mastery'][t]}% — a quick review will lock it in."})
-    nxt = next((l for l in sorted(LESSONS, key=lambda l: l["order"]) if l["id"] not in done), None)
-    if nxt:
-        recs.append({"type": "lesson", "id": nxt["id"], "title": f"Next up: {nxt['title']}", "reason": nxt["summary"]})
-    if stats["experiments"] == 0:
-        recs.append({"type": "builder", "id": "bell", "title": "Run your first circuit",
-                     "reason": "Load the Bell-state example in the Circuit Builder and press Run."})
-    done_topics = {l["topic"] for l in LESSONS if l["id"] in done} | {"gates", "superposition"}
-    for ch in CHALLENGES:
-        if ch["id"] not in stats["challenges_solved"] and ch["topic"] in done_topics:
-            recs.append({"type": "challenge", "id": ch["id"], "title": f"Challenge: {ch['title']}",
-                         "reason": f"{ch['difficulty']} · {ch['points']} XP — {ch['description']}"})
-            break
-    if not recs:
-        recs.append({"type": "algorithm", "id": "qft", "title": "Explore the Quantum Fourier Transform",
-                     "reason": "You've finished the core path — time for advanced algorithms!"})
-    return recs[:4]
+    order = [course] if course else [c for c in R.course_ids() if stats["courses"][c]["started"]] or ["quantum"]
+    for cid in order:
+        cs = stats["courses"][cid]
+        title = R.course(cid)["short"]
+        for t in cs["weak_topics"][:2]:
+            lesson = next((l for l in R.lessons(cid) if l["topic"] == t), None)
+            if lesson:
+                recs.append({"type": "lesson", "course": cid, "id": lesson["id"], "title": f"Review: {lesson['title']}",
+                             "reason": f"{title} · your {R.topics(cid)[t].lower()} score is {cs['mastery'][t]}%."})
+        nxt = next((l for l in R.lessons(cid) if l["id"] not in cs["lessons_completed"]), None)
+        if nxt:
+            recs.append({"type": "lesson", "course": cid, "id": nxt["id"], "title": f"Next up: {nxt['title']}", "reason": f"{title} · {nxt['summary']}"})
+        if cs["experiments"] == 0:
+            lab = R.course(cid)["labs"][0]
+            recs.append({"type": "lab", "course": cid, "id": lab["id"], "title": f"Try the {lab['title']}", "reason": lab["description"]})
+        done_topics = {l["topic"] for l in R.lessons(cid) if l["id"] in cs["lessons_completed"]}
+        for ch in R.challenges(cid):
+            if ch["id"] not in cs["challenges_solved"] and (ch["topic"] in done_topics or ch["difficulty"] == "Easy"):
+                recs.append({"type": "challenge", "course": cid, "id": ch["id"], "title": f"Challenge: {ch['title']}",
+                             "reason": f"{title} · {ch['difficulty']} · {ch['points']} XP"})
+                break
+    if not course:
+        unstarted = [c for c in R.course_ids() if not stats["courses"][c]["started"]]
+        if unstarted:
+            c = R.course(unstarted[0])
+            recs.append({"type": "course", "course": c["id"], "id": c["id"], "title": f"Start a new course: {c['title']}", "reason": c["tagline"]})
+    return recs[:5]
 
 
-def classroom_overview(db: Session, code: str) -> dict:
+def classroom_overview(db: Session, code: str, course: str = "all") -> dict:
     students = db.scalars(select(User).where(User.classroom_code == code, User.role == "student")).all()
-    rows = []
-    topic_acc: dict[str, list[int]] = defaultdict(list)
+    if course != "all" and course not in R.course_ids():
+        course = "all"
+    columns = ({cid: R.course(cid)["short"] for cid in R.course_ids()} if course == "all" else R.topics(course))
+    rows, acc = [], defaultdict(list)
     for s in students:
         st = user_stats(db, s)
-        quiz_vals = [v["percent"] for v in st["quiz_best"].values()]
-        rows.append({
-            "id": s.id, "name": s.name, "xp": st["xp"], "level": st["level"],
-            "lessons_completed": len(st["lessons_completed"]),
-            "avg_quiz": round(sum(quiz_vals) / len(quiz_vals)) if quiz_vals else None,
-            "challenges_solved": len(st["challenges_solved"]),
-            "experiments": st["experiments"], "questions_asked": st["questions_asked"],
-            "weak_topics": st["weak_topics"], "mastery": st["mastery"], "last_active": st["last_active"],
-            "lessons_done_ids": st["lessons_completed"], "challenges_done_ids": st["challenges_solved"],
-        })
-        for t, m in st["mastery"].items():
-            if m is not None:
-                topic_acc[t].append(m)
-    heat = {t: (round(sum(v) / len(v)) if (v := topic_acc.get(t)) else None) for t in TOPICS}
-    weakest = sorted([t for t, v in heat.items() if v is not None], key=lambda t: heat[t])[:3]
+        cs_list = list(st["courses"].values()) if course == "all" else [st["courses"][course]]
+        quiz_vals = [v["percent"] for cs in cs_list for v in cs["quiz_best"].values()]
+        if course == "all":
+            heat = {cid: st["courses"][cid]["overall_mastery"] for cid in R.course_ids()}
+            weak = [f"{cid}:{t}" for cid in R.course_ids() for t in st["courses"][cid]["weak_topics"]]
+        else:
+            heat = st["courses"][course]["mastery"]
+            weak = [f"{course}:{t}" for t in st["courses"][course]["weak_topics"]]
+        row = {
+            "id": s.id, "name": s.name, "xp": st["xp"] if course == "all" else st["courses"][course]["xp"], "level": st["level"],
+            "lessons_completed": sum(len(cs["lessons_completed"]) for cs in cs_list),
+            "lessons_total": sum(cs["lessons_total"] for cs in cs_list),
+            "avg_quiz": _avg(quiz_vals),
+            "challenges_solved": sum(len(cs["challenges_solved"]) for cs in cs_list),
+            "experiments": sum(cs["experiments"] for cs in cs_list), "questions_asked": st["questions_asked"],
+            "weak_topics": weak, "heat": heat, "last_active": st["last_active"],
+            "done_ids": [i for cs in st["courses"].values() for i in cs["lessons_completed"] + cs["challenges_solved"]],
+        }
+        rows.append(row)
+        for k, v in heat.items():
+            if v is not None:
+                acc[k].append(v)
+    class_heat = {k: _avg(acc.get(k, [])) for k in columns}
+    weakest = sorted([k for k, v in class_heat.items() if v is not None], key=lambda k: class_heat[k])[:3]
+    with_quiz = [r["avg_quiz"] for r in rows if r["avg_quiz"] is not None]
     return {
-        "students": sorted(rows, key=lambda r: -r["xp"]),
-        "topic_mastery": heat,
-        "weakest_topics": weakest,
-        "totals": {
-            "students": len(rows),
-            "avg_quiz": round(sum(r["avg_quiz"] for r in rows if r["avg_quiz"] is not None) / max(1, sum(1 for r in rows if r["avg_quiz"] is not None))) if rows else None,
-            "experiments": sum(r["experiments"] for r in rows),
-            "challenges_solved": sum(r["challenges_solved"] for r in rows),
-        },
+        "course": course, "columns": columns, "students": sorted(rows, key=lambda r: -r["xp"]),
+        "class_heat": class_heat, "weakest": weakest,
+        "totals": {"students": len(rows), "avg_quiz": _avg(with_quiz), "experiments": sum(r["experiments"] for r in rows),
+                   "challenges_solved": sum(r["challenges_solved"] for r in rows)},
     }
 
 
 def assignment_completion(assignment: Assignment, rows: list[dict]) -> int:
     if not rows:
         return 0
-    key = "lessons_done_ids" if assignment.item_type == "lesson" else "challenges_done_ids"
-    done = sum(1 for r in rows if assignment.item_id in r[key])
-    return round(100 * done / len(rows))
+    return round(100 * sum(1 for r in rows if assignment.item_id in r["done_ids"]) / len(rows))
