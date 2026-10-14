@@ -1,0 +1,12 @@
+# Core (required)
+fastapi>=0.110
+uvicorn[standard]>=0.29
+pydantic>=2.6
+sqlalchemy>=2.0
+numpy>=1.26
+python-dotenv>=1.0
+
+# Real quantum simulation with IBM's Qiskit Aer (recommended; the app falls back
+# to its built-in NumPy statevector engine if these are missing)
+qiskit>=1.0
+qiskit-aer>=0.14

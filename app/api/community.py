@@ -1,0 +1,139 @@
+"""Users, AI tutor, classrooms and the instructor dashboard."""
+from __future__ import annotations
+
+import secrets
+import string
+
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.concurrency import run_in_threadpool
+from sqlalchemy import select
+from sqlalchemy.orm import Session
+
+from ..ai import tutor
+from ..database import Assignment, Classroom, TutorMessage, User, get_session
+from ..schemas import AssignmentCreate, ClassroomCreate, TutorRequest, UserCreate
+from ..services.demo import seed_demo_classroom
+from ..services.progress import assignment_completion, classroom_overview
+
+router = APIRouter(prefix="/api", tags=["community"])
+
+
+# ----------------------------------------------------------------------------- users
+@router.post("/users")
+def create_user(body: UserCreate, db: Session = Depends(get_session)) -> dict:
+    code = body.classroom_code.strip().upper() if body.classroom_code else None
+    if code and not db.scalar(select(Classroom).where(Classroom.code == code)):
+        raise HTTPException(404, f"Classroom '{code}' does not exist")
+    user = User(name=body.name.strip(), role=body.role, classroom_code=code)
+    db.add(user)
+    db.commit()
+    return {"id": user.id, "name": user.name, "role": user.role, "classroom_code": user.classroom_code}
+
+
+@router.get("/users/{user_id}")
+def get_user(user_id: int, db: Session = Depends(get_session)) -> dict:
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(404, "User not found")
+    return {"id": user.id, "name": user.name, "role": user.role, "classroom_code": user.classroom_code}
+
+
+@router.post("/users/{user_id}/join/{code}")
+def join_classroom(user_id: int, code: str, db: Session = Depends(get_session)) -> dict:
+    user = db.get(User, user_id)
+    code = code.strip().upper()
+    if not user:
+        raise HTTPException(404, "User not found")
+    if not db.scalar(select(Classroom).where(Classroom.code == code)):
+        raise HTTPException(404, f"Classroom '{code}' does not exist")
+    user.classroom_code = code
+    db.commit()
+    return {"ok": True, "classroom_code": code}
+
+
+# -------------------------------------------------------------------------- AI tutor
+@router.get("/tutor/status")
+def tutor_status() -> dict:
+    return {"provider": tutor.active_provider()}
+
+
+@router.post("/tutor/ask")
+async def tutor_ask(req: TutorRequest, db: Session = Depends(get_session)) -> dict:
+    circuit = req.circuit.model_dump() if req.circuit else None
+    answer = await run_in_threadpool(
+        tutor.ask, req.question, circuit, req.result, req.history, req.lesson_id, req.challenge_id
+    )
+    if req.user_id and db.get(User, req.user_id):
+        db.add(TutorMessage(user_id=req.user_id, question=req.question[:2000], provider=answer["provider"]))
+        db.commit()
+    return answer
+
+
+# ------------------------------------------------------------------------ classrooms
+def _code(db: Session) -> str:
+    alphabet = string.ascii_uppercase + string.digits
+    while True:
+        code = "".join(secrets.choice(alphabet) for _ in range(6))
+        if not db.scalar(select(Classroom).where(Classroom.code == code)):
+            return code
+
+
+@router.post("/classrooms")
+def create_classroom(body: ClassroomCreate, db: Session = Depends(get_session)) -> dict:
+    teacher = db.get(User, body.instructor_id)
+    if not teacher or teacher.role != "instructor":
+        raise HTTPException(403, "Only instructors can create classrooms")
+    room = Classroom(code=_code(db), name=body.name.strip(), instructor_id=teacher.id)
+    db.add(room)
+    db.commit()
+    return {"code": room.code, "name": room.name}
+
+
+@router.get("/classrooms/instructor/{instructor_id}")
+def my_classrooms(instructor_id: int, db: Session = Depends(get_session)) -> list[dict]:
+    rooms = db.scalars(select(Classroom).where(Classroom.instructor_id == instructor_id)).all()
+    return [{"code": r.code, "name": r.name} for r in rooms]
+
+
+@router.post("/classrooms/demo")
+def demo_classroom(instructor_id: int | None = None, db: Session = Depends(get_session)) -> dict:
+    code = seed_demo_classroom(db, instructor_id)
+    room = db.scalar(select(Classroom).where(Classroom.code == code))
+    return {"code": code, "name": room.name if room else code}
+
+
+@router.get("/classrooms/{code}/overview")
+def overview(code: str, db: Session = Depends(get_session)) -> dict:
+    code = code.upper()
+    room = db.scalar(select(Classroom).where(Classroom.code == code))
+    if not room:
+        raise HTTPException(404, "Classroom not found")
+    data = classroom_overview(db, code)
+    assignments = db.scalars(select(Assignment).where(Assignment.classroom_id == room.id).order_by(Assignment.created_at)).all()
+    data["classroom"] = {"code": room.code, "name": room.name}
+    data["assignments"] = [
+        {"id": a.id, "title": a.title, "item_type": a.item_type, "item_id": a.item_id, "due": a.due,
+         "completion": assignment_completion(a, data["students"])}
+        for a in assignments
+    ]
+    return data
+
+
+@router.post("/classrooms/{code}/assignments")
+def add_assignment(code: str, body: AssignmentCreate, db: Session = Depends(get_session)) -> dict:
+    room = db.scalar(select(Classroom).where(Classroom.code == code.upper()))
+    if not room:
+        raise HTTPException(404, "Classroom not found")
+    a = Assignment(classroom_id=room.id, title=body.title, item_type=body.item_type, item_id=body.item_id, due=body.due)
+    db.add(a)
+    db.commit()
+    return {"id": a.id}
+
+
+@router.get("/classrooms/{code}/assignments")
+def list_assignments(code: str, db: Session = Depends(get_session)) -> list[dict]:
+    room = db.scalar(select(Classroom).where(Classroom.code == code.upper()))
+    if not room:
+        raise HTTPException(404, "Classroom not found")
+    rows = db.scalars(select(Assignment).where(Assignment.classroom_id == room.id)).all()
+    return [{"id": a.id, "title": a.title, "item_type": a.item_type, "item_id": a.item_id, "due": a.due} for a in rows]

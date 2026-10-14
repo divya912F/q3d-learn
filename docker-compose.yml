@@ -1,0 +1,29 @@
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      DATABASE_URL: postgresql+psycopg://q3d:q3d@db:5432/q3d_learn
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: q3d
+      POSTGRES_PASSWORD: q3d
+      POSTGRES_DB: q3d_learn
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U q3d -d q3d_learn"]
+      interval: 5s
+      retries: 10
+
+volumes:
+  pgdata:
