@@ -7,7 +7,7 @@
 **Four interactive courses — Quantum Computing · Machine Learning · Data Science · Artificial Intelligence**
 <br>Learn concepts · Play with visual labs · Run real computations · Ask an AI tutor (text + voice) · Solve challenges · Track progress
 
-[![CI](https://github.com/YOUR-USERNAME/q3d-learn/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
+[![CI](https://github.com/divya912F/q3d-learn/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
 ![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688)
 ![Three.js](https://img.shields.io/badge/3D-Three.js-black)
@@ -61,7 +61,7 @@ More in [`docs/screenshots`](docs/screenshots): data explorer, probability lab, 
 **Requirements:** Python 3.10+ and a modern browser. No Node.js or build step.
 
 ```bash
-git clone https://github.com/YOUR-USERNAME/q3d-learn.git
+git clone https://github.com/divya912F/q3d-learn.git
 cd q3d-learn
 python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
