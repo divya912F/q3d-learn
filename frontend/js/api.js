@@ -62,4 +62,18 @@ export const api = {
   demoClassroom: (uid) => request('POST', `/api/classrooms/demo${uid ? `?instructor_id=${uid}` : ''}`),
   overview: (code, course = 'all') => request('GET', `/api/classrooms/${encodeURIComponent(code)}/overview?course=${course}`),
   addAssignment: (code, body) => request('POST', `/api/classrooms/${encodeURIComponent(code)}/assignments`, body),
+
+  // study tools
+  glossary: (course) => request('GET', `/api/glossary${course ? `?course=${course}` : ''}`),
+  deck: (course) => request('GET', `/api/review/deck${course ? `?course=${course}` : ''}`),
+  dueCards: (uid, course, limit = 20) => request('GET', `/api/review/${uid}/due?limit=${limit}${course ? `&course=${course}` : ''}`),
+  gradeCard: (uid, card_id, grade) => request('POST', `/api/review/${uid}/grade`, { card_id, grade }),
+  reviewStats: (uid, course) => request('GET', `/api/review/${uid}/stats${course ? `?course=${course}` : ''}`),
+  logFocus: (body) => request('POST', '/api/focus', body),
+  focus: (uid) => request('GET', `/api/focus/${uid}`),
+  notes: (uid) => request('GET', `/api/notes/${uid}`),
+  note: (uid, lessonId) => request('GET', `/api/notes/${uid}/${encodeURIComponent(lessonId)}`),
+  saveNote: (uid, lessonId, text) => request('PUT', `/api/notes/${uid}/${encodeURIComponent(lessonId)}`, { text }),
+  certificate: (uid, course) => request('GET', `/api/certificate/${uid}/${course}`),
+  verifyCertificate: (code) => request('GET', `/api/certificates/verify/${encodeURIComponent(code)}`),
 };

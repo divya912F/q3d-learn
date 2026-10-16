@@ -24,7 +24,7 @@ export async function render(root) {
       <div class="grow"><span class="hand" style="font-size:1.3rem;color:var(--pink)">study report card</span>
         <h2 style="margin:0">${esc(p.user.name)}</h2>
         <div class="muted small">${p.user.role === 'instructor' ? 'Instructor' : 'Learner'}${p.user.classroom_code ? ` · classroom <b class="mono">${esc(p.user.classroom_code)}</b>` : ''}</div>
-        <div class="row" style="margin-top:10px"><span class="chip amber">${icon('zap')} ${p.xp} XP</span><span class="chip">Level ${p.level}</span><span class="chip pink">🔥 ${p.streak}-day streak</span><span class="chip green">${p.lessons_completed_total} lessons · ${p.challenges_solved_total} challenges</span></div>
+        <div class="row" style="margin-top:10px"><span class="chip amber">${icon('zap')} ${p.xp} XP</span><span class="chip">Level ${p.level}</span><span class="chip pink">🔥 ${p.streak}-day streak</span><span class="chip green">${p.lessons_completed_total} lessons · ${p.challenges_solved_total} challenges</span><span class="chip violet">⏳ ${p.focus_minutes} focus min</span><span class="chip gray">🃏 ${p.reviews_total} card reviews</span></div>
       </div>
       <button class="btn btn-ghost btn-sm" data-edit>Edit profile</button></div></div>
     <div class="course-progress" data-cps></div>
@@ -61,7 +61,7 @@ export async function render(root) {
     const next = lessons.find((l) => !done.has(l.id));
     const box = root.querySelector('[data-detail]');
     box.innerHTML = `<div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
-      <div class="card"><div class="card-head"><h3>${icon('sparkle')} Next steps in ${esc(meta.short)}</h3></div><div class="stack" style="gap:8px" data-recs></div></div>
+      <div class="card"><div class="card-head"><h3>${icon('sparkle')} Next steps in ${esc(meta.short)}</h3><a class="btn btn-ghost btn-sm" href="#/certificate/${course}">${icon('award')} Certificate</a></div><div class="stack" style="gap:8px" data-recs></div></div>
       <div class="card chart"><div class="card-head"><h3>${icon('target')} Topic mastery</h3><span class="faint tiny">quizzes + challenges</span></div><div data-radar></div>
         ${cp.weak_topics.length ? `<p class="small" style="margin:6px 0 0"><span class="hl-pink">Focus on: ${cp.weak_topics.map((t) => esc(meta.topics[t])).join(', ')}</span></p>` : ''}</div>
       <div class="card paper-lines" style="padding-left:62px"><div class="card-head"><h3>${icon('layers')} Learning path</h3></div><div class="path">${lessons.map((l) => {

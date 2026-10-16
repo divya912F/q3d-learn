@@ -5,7 +5,7 @@
 ### Your visual study desk for the future of tech
 
 **Four interactive courses — Quantum Computing · Machine Learning · Data Science · Artificial Intelligence**
-<br>Learn concepts · Play with visual labs · Run real computations · Ask an AI tutor (text + voice) · Solve challenges · Track progress
+<br>Learn concepts · Play with visual labs · Run real computations · Ask an AI tutor (text + voice) · Review with spaced repetition · Study under a living sky · Works offline
 
 [![CI](https://github.com/divya912F/q3d-learn/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
@@ -40,6 +40,20 @@ Plus, across all courses:
 - 👩‍🏫 **Instructor dashboard** — classrooms with join codes, all-courses or per-course mastery heatmaps, weak-topic alerts, sortable student table, assignments from any course with completion tracking, one-click demo class.
 - 📝 **Study theme** — warm "notebook paper" light theme with highlighter accents, sticky notes and chalkboard panels for 3D/simulations, plus a **night-study dark mode**. Responsive down to phones.
 
+### 🆕 New in v2.1 — study smarter, not longer
+
+| Feature | What it does | Why (research) |
+|---|---|---|
+| 🌤️ **Living sky** | An animated sky behind your desk that follows **your time of day** (dawn → golden hour → night) and, if you opt in, **your real local weather** (Open-Meteo, no account). Or pick a mood: rain, snow, storm, fog, aurora, *quantum night* (floating qubits in the course colour). Optional generated ambient sound: soft rain, brown noise, ocean waves. | A calm, personal study space; colours are blended with the theme so text stays readable, and it pauses for reduced-motion users. |
+| 🃏 **Review cards (spaced repetition)** | Every quiz question and key concept becomes a flashcard (**150+ cards**). Anki-style *Again / Hard / Good / Easy* buttons with the **SM-2** scheduler; due-card badge in the sidebar; guest practice mode. | Retrieval practice and spacing are among the most robust findings in learning science. |
+| ⏳ **Focus timer** | Pomodoro blocks (25/5, 50/10, 15/3) that survive page changes, chime when done and log minutes to your XP and streak. Press **F** anywhere. | Short, protected focus blocks reduce task-switching. |
+| 🔤 **Glossary + in-lesson definitions** | 66 terms across the four courses. Key words in lessons are underlined — tap one for its definition without leaving the page. | A low-barrier "bridge" for learners missing background vocabulary. |
+| ✏️ **My notebook** | A notes box beside every lesson (auto-saved to your profile, or this browser for guests), collected on one page and exportable to Markdown. | Summarising in your own words improves recall. |
+| 🔎 **Command palette** | **Ctrl/⌘ + K** (or **/**) searches every lesson, lab, challenge, glossary term and action. | Faster navigation for a big curriculum. |
+| 🏅 **Certificates** | Finish every lesson with a 60%+ quiz average to unlock a printable certificate with a verification code (`#/certificate/verify/<code>`). | Recognisable milestones for students and instructors. |
+| 📲 **Installable & offline (PWA)** | Install on phones and laptops; the whole app shell is cached and pages you opened keep working with no internet. | Designed for patchy connectivity and low-end devices. |
+| ♿ **Accessibility settings** | Text size (4 steps), reduced motion, high contrast and a readable font (Lexend). | Open and inclusive by default. |
+
 ## 📸 Screenshots
 
 | Classifier playground (ML) | 3D loss landscape (ML) |
@@ -54,7 +68,14 @@ Plus, across all courses:
 | **Instructor dashboard** | **Night-study dark mode** |
 | ![instructor](docs/screenshots/instructor.png) | ![dark](docs/screenshots/dark-mode.png) |
 
-More in [`docs/screenshots`](docs/screenshots): data explorer, probability lab, k-means, next-word predictor, Bloch lab, progress page.
+| **Living sky — time of day, weather and moods** | |
+| ![living sky](docs/screenshots/living-sky.png) | |
+| **Review cards (spaced repetition)** | **Glossary terms inside lessons** |
+| ![review](docs/screenshots/review-cards.png) | ![glossary tips](docs/screenshots/lesson-glossary.png) |
+| **Command palette (Ctrl + K)** | **Focus timer** |
+| ![palette](docs/screenshots/command-palette.png) | ![focus](docs/screenshots/focus-timer.png) |
+
+More in [`docs/screenshots`](docs/screenshots): glossary, sky settings panel, data explorer, probability lab, k-means, next-word predictor, Bloch lab, progress page.
 
 ## 🚀 Quick start
 
@@ -98,7 +119,7 @@ docker compose up --build
 
 ```bash
 pip install -r requirements-dev.txt
-pytest          # 64 tests: simulators, ML/DS/AI engines, content integrity, API
+pytest          # 77 tests: simulators, ML/DS/AI engines, content integrity, API, spaced repetition, offline app shell
 ```
 
 ## 🏗️ Architecture
@@ -106,7 +127,7 @@ pytest          # 64 tests: simulators, ML/DS/AI engines, content integrity, API
 ```
 Student (browser: laptop / tablet / phone)
         │
-Frontend ── ES modules · Three.js (3D) · Canvas/SVG charts · Monaco · KaTeX · Web Speech API     (frontend/)
+Frontend ── ES modules · Three.js (3D) · Canvas/SVG charts · Monaco · KaTeX · Web Speech/Audio API · living-sky canvas · service worker (frontend/)
         │  REST / JSON
 Backend  ── FastAPI routers: courses & learning · quantum · labs (ml/ds/ai) · tutor & classrooms   (app/api/)
    ├── Course registry ── quantum · ml · ds · ai  (lessons, quizzes, challenges, tutor knowledge)  (app/courses/)
@@ -115,6 +136,7 @@ Backend  ── FastAPI routers: courses & learning · quantum · labs (ml/ds/ai
    │                      Data science: datasets, stats, cleaning pipeline, CLT                    (app/courses/ds/engine.py)
    │                      AI: BFS/DFS/UCS/Greedy/A*, minimax+α–β, Q-learning, n-gram LM           (app/courses/ai/engine.py)
    ├── AI tutor        ── grounding (circuit + lab facts + validated notes) → OpenAI | Gemini | offline   (app/ai/)
+   ├── Study tools     ── flashcard deck + SM-2, glossary, focus sessions, notes, certificates   (app/services/study.py)
    └── Analytics       ── per-course XP, mastery, streaks, recommendations, class overview         (app/services/)
         │
 Database ── SQLAlchemy 2 → SQLite (default) or PostgreSQL                                          (app/database.py)
@@ -124,19 +146,21 @@ Database ── SQLAlchemy 2 → SQLite (default) or PostgreSQL                 
 q3d-learn/
 ├── app/
 │   ├── main.py · config.py · database.py · schemas.py
-│   ├── api/            learning.py · quantum.py · labs.py · community.py
+│   ├── api/            learning.py · quantum.py · labs.py · community.py · study.py
 │   ├── courses/        registry.py + quantum/ · ml/ · ds/ · ai/  (content.py + engine.py each)
 │   ├── quantum/        gates · simulator · analysis · validation · qasm · qiskit_runner · algorithms
 │   ├── ai/tutor.py     LLM providers + grounding + offline tutor
-│   └── services/       progress.py (analytics) · demo.py
+│   └── services/       progress.py (analytics) · study.py (flashcards, SM-2, glossary) · demo.py
 ├── frontend/
-│   ├── index.html · css/main.css (study theme, light + dark)
-│   ├── js/views/       home · course · learn · labview · challenges · tutor · progress · instructor · about · quantum views
+│   ├── index.html · css/main.css (study theme, light + dark) · sw.js + manifest (offline app)
+│   ├── js/sky.js       living sky (time of day, live weather, moods, ambient sound)
+│   ├── js/study/       focus timer · command palette · glossary tips · notes · settings
+│   ├── js/views/       home · course · learn · labview · challenges · review · glossary · notes · certificate · tutor · progress · instructor · about · quantum views
 │   ├── js/labs/        ml-regression · ml-classifier · ml-kmeans · ds-explorer · ds-pipeline · ds-stats · ai-search · ai-minimax · ai-rl · ai-nlp
 │   ├── js/three/       bloch.js · qsphere.js · landscape.js
 │   ├── js/circuit/     editor.js · results.js · code.js
 │   └── vendor/three/   Three.js (bundled so 3D works offline)
-├── tests/              test_simulator.py · test_courses.py · test_api.py
+├── tests/              test_simulator.py · test_courses.py · test_api.py · test_study.py · test_pwa.py
 └── Dockerfile · docker-compose.yml · .github/workflows/ci.yml
 ```
 
@@ -165,6 +189,11 @@ All visuals are driven by real computation, never canned animations: the quantum
 | `POST` | `/api/tutor/ask` | AI tutor (`course`, `circuit`, `lab` context) |
 | `GET` | `/api/progress/{user_id}` | XP, streak, per-course progress, recommendations |
 | `GET` | `/api/classrooms/{code}/overview?course=all\|ml\|…` | Instructor analytics |
+| `GET` | `/api/review/{user_id}/due` · `POST /api/review/{user_id}/grade` | Spaced-repetition queue and SM-2 grading |
+| `GET` | `/api/glossary?course=` · `/api/review/deck` | Glossary terms and the full flashcard deck |
+| `POST` | `/api/focus` · `GET /api/focus/{user_id}` | Log focus blocks, weekly summary |
+| `GET`/`PUT` | `/api/notes/{user_id}[/{lesson_id}]` | Lesson notes |
+| `GET` | `/api/certificate/{user_id}/{course}` · `/api/certificates/verify/{code}` | Certificates and verification |
 
 ```bash
 curl -X POST localhost:8000/api/ml/classifier -H "Content-Type: application/json" \
@@ -184,6 +213,8 @@ curl -X POST localhost:8000/api/ml/classifier -H "Content-Type: application/json
 - [ ] Noise models and real IBM Quantum hardware runs
 - [ ] CNN / image-classifier lab, transformer attention visualiser
 - [ ] Multilingual content (Hindi first)
+- [ ] Shared study rooms (focus together with classmates)
+- [x] ~~Spaced repetition, focus timer, glossary, notes, certificates, offline PWA, living sky~~ (v2.1)
 - [ ] Password / SSO authentication and LMS (LTI) integration
 
 ## 🤝 Contributing
@@ -197,6 +228,10 @@ Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Good first
 - IBM Quantum Learning — Bloch Sphere — https://quantum.cloud.ibm.com/learning/en/courses/general-formulation-of-quantum-information/density-matrices/bloch-sphere
 - Qiskit Aer documentation — https://qiskit.github.io/qiskit-aer/
 - Qerimi et al. (2025), *Comparing Visual Qubit Representations in Quantum Education: The Bloch Sphere Enhances Task Efficiency* — https://arxiv.org/abs/2507.21721
+- *The Quantum Education Ecosystem: A Review of Global Initiatives, Methods, and Challenges* (2026) — guided progression, visualisation with facilitation, built-in assessment, accessibility and multilingual access — https://arxiv.org/abs/2604.06293
+- Spaced practice in STEM courses, *International Journal of STEM Education* (2024) — https://link.springer.com/article/10.1186/s40594-024-00468-5
+- Offline-first, multilingual rural learning in India, ITM Web of Conferences (2026) — https://www.itm-conferences.org/articles/itmconf/pdf/2026/01/itmconf_etmis2025_01012.pdf
+- Weather data: [Open-Meteo](https://open-meteo.com/) (free, no API key)
 
 ## 📄 License
 

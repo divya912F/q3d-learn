@@ -25,6 +25,9 @@ The frontend is plain ES modules — edit files in `frontend/` and refresh the b
 | Add a gate | `app/quantum/gates.py`, the palette in `frontend/js/circuit/editor.js`, and (single-qubit) `frontend/js/quantum.js` |
 | Improve the offline tutor | `KNOWLEDGE` in each course's `content.py`, `app/ai/tutor.py` |
 | Change the look | `frontend/css/main.css` (design tokens are at the top) |
+| Add a sky mood or ambient sound | `frontend/js/sky.js` (`MOODS`, `SOUNDS`) |
+| Add a glossary display name | `TERMS` in `app/services/study.py` (every `KNOWLEDGE` entry becomes a term and a flashcard) |
+| Add a new frontend file | also list it in `SHELL` in `frontend/sw.js` and bump `VERSION` (a test checks this) |
 
 ## Guidelines
 

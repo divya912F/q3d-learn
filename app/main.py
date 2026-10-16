@@ -6,6 +6,7 @@ API docs:  http://localhost:8000/docs
 from __future__ import annotations
 
 import logging
+import mimetypes
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -13,10 +14,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from .api import community, labs, learning, quantum
+from .api import community, labs, learning, quantum, study
 from .config import settings
 from .database import init_db
 
+mimetypes.add_type("application/manifest+json", ".webmanifest")
+mimetypes.add_type("text/javascript", ".js")
 logging.basicConfig(level=logging.INFO, format="%(levelname)s %(name)s: %(message)s")
 
 
@@ -45,6 +48,7 @@ def create_app() -> FastAPI:
     app.include_router(learning.router)
     app.include_router(community.router)
     app.include_router(labs.router)
+    app.include_router(study.router)
 
     @app.get("/api/health", tags=["system"])
     def health() -> dict:

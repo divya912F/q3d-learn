@@ -8,13 +8,17 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from ..courses import registry as R
-from ..database import Assignment, ChallengeAttempt, Experiment, LessonProgress, QuizResult, TutorMessage, User
+from ..database import Assignment, ChallengeAttempt, Experiment, FocusSession, LessonProgress, QuizResult, ReviewLog, TutorMessage, User
 
 XP_LESSON = 50
 XP_PER_CORRECT = 10
 XP_EXPERIMENT = 2
 XP_EXPERIMENT_CAP = 100  # per course
 XP_PER_LEVEL = 250
+XP_REVIEW = 1          # per flashcard review
+XP_REVIEW_CAP = 300
+XP_FOCUS_PER_25 = 5    # per 25 focused minutes
+XP_FOCUS_CAP = 200
 
 
 def _aware(dt: datetime) -> datetime:
@@ -31,6 +35,8 @@ def user_stats(db: Session, user: User) -> dict:
     attempts = db.scalars(select(ChallengeAttempt).where(ChallengeAttempt.user_id == user.id)).all()
     experiments = db.scalars(select(Experiment).where(Experiment.user_id == user.id).order_by(Experiment.created_at.desc())).all()
     questions = db.scalar(select(func.count()).select_from(TutorMessage).where(TutorMessage.user_id == user.id)) or 0
+    reviews = db.scalars(select(ReviewLog).where(ReviewLog.user_id == user.id)).all()
+    focus = db.scalars(select(FocusSession).where(FocusSession.user_id == user.id)).all()
 
     courses: dict[str, dict] = {}
     total_xp = 0
@@ -79,8 +85,12 @@ def user_stats(db: Session, user: User) -> dict:
             "started": bool(done or best or attempted or exps),
         }
 
+    focus_minutes = sum(f.minutes for f in focus)
+    study_xp = min(XP_REVIEW_CAP, XP_REVIEW * len(reviews)) + min(XP_FOCUS_CAP, XP_FOCUS_PER_25 * (focus_minutes // 25))
+    total_xp += study_xp
     now = datetime.now(timezone.utc)
-    stamps = [_aware(e.created_at) for e in experiments] + [_aware(q.created_at) for q in quizzes] + [_aware(a.created_at) for a in attempts]
+    stamps = ([_aware(e.created_at) for e in experiments] + [_aware(q.created_at) for q in quizzes] + [_aware(a.created_at) for a in attempts]
+              + [_aware(r.created_at) for r in reviews] + [_aware(f.created_at) for f in focus])
     per_day: dict[str, int] = defaultdict(int)
     for ts in stamps:
         d = (now - ts).days
@@ -105,7 +115,8 @@ def user_stats(db: Session, user: User) -> dict:
         "recent_experiments": [{"course": e.course or "quantum", "lab": e.lab, "num_qubits": e.num_qubits, "gate_count": e.gate_count,
                                 "depth": e.depth, "backend": e.backend, "state": e.state_name, "date": _aware(e.created_at).isoformat()}
                                for e in experiments[:10]],
-        "questions_asked": questions, "activity": activity, "streak": streak, "last_active": last_active.isoformat(),
+        "questions_asked": questions, "reviews_total": len(reviews), "focus_minutes": focus_minutes, "study_xp": study_xp,
+        "activity": activity, "streak": streak, "last_active": last_active.isoformat(),
         "lessons_completed_total": sum(len(c["lessons_completed"]) for c in courses.values()),
         "challenges_solved_total": sum(len(c["challenges_solved"]) for c in courses.values()),
     }

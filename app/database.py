@@ -129,6 +129,54 @@ class Assignment(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class ReviewCard(Base):
+    """Spaced-repetition state of one flashcard for one learner (SM-2)."""
+
+    __tablename__ = "review_cards"
+    __table_args__ = (UniqueConstraint("user_id", "card_id"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    card_id: Mapped[str] = mapped_column(String(96))
+    course: Mapped[str] = mapped_column(String(16), index=True)
+    ease: Mapped[float] = mapped_column(Float, default=2.5)
+    interval: Mapped[float] = mapped_column(Float, default=0.0)
+    reps: Mapped[int] = mapped_column(Integer, default=0)
+    lapses: Mapped[int] = mapped_column(Integer, default=0)
+    due: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now, index=True)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class ReviewLog(Base):
+    __tablename__ = "review_logs"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    card_id: Mapped[str] = mapped_column(String(96))
+    course: Mapped[str] = mapped_column(String(16))
+    grade: Mapped[int] = mapped_column(Integer)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class FocusSession(Base):
+    __tablename__ = "focus_sessions"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    course: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    minutes: Mapped[int] = mapped_column(Integer)
+    label: Mapped[str] = mapped_column(String(120), default="")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
+class Note(Base):
+    __tablename__ = "notes"
+    __table_args__ = (UniqueConstraint("user_id", "lesson_id"),)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), index=True)
+    course: Mapped[str] = mapped_column(String(16))
+    lesson_id: Mapped[str] = mapped_column(String(64))
+    text: Mapped[str] = mapped_column(Text, default="")
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 _engine = None
 _SessionLocal: sessionmaker | None = None
 

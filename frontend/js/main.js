@@ -3,6 +3,10 @@ import { api } from './api.js';
 import { store } from './store.js';
 import { $, $$, esc, hydrateIcons, initials, toast, icon } from './ui.js';
 import { Chat } from './components/chat.js';
+import { initSky, onSkyChange, info as skyInfo } from './sky.js';
+import { applyPrefs, openSettings, openAmbience } from './study/settings.js';
+import { initFocus, openFocus, startFocus } from './study/focus.js';
+import { openPalette } from './study/palette.js';
 
 const QUANTUM_LABS = {
   bloch: () => import('./views/lab.js'),
@@ -57,6 +61,10 @@ function resolve() {
     progress: ['My Progress', () => import('./views/progress.js')],
     instructor: ['Instructor Dashboard', () => import('./views/instructor.js')],
     about: ['About the Project', () => import('./views/about.js')],
+    review: ['Review cards', () => import('./views/review.js')],
+    glossary: ['Glossary', () => import('./views/glossary.js')],
+    notes: ['My notebook', () => import('./views/notes.js')],
+    certificate: ['Certificate', () => import('./views/certificate.js')],
   };
   if (simple[parts[0]]) return { key: parts[0], title: simple[parts[0]][0], load: simple[parts[0]][1], params: parts.slice(1), query, course: null };
   return { key: 'home', title: 'Study desk', load: () => import('./views/home.js'), params: [], query, course: null };
@@ -129,6 +137,9 @@ function renderNav(r = resolve()) {
     }
   }
   html += '<div class="nav-label">Study tools</div>';
+  html += link('#/review', 'cards', 'Review cards', r.key === 'review', '').replace('</span></a>', `</span>${store.dueCount ? `<span class="badge" title="cards due">${store.dueCount}</span>` : ''}</a>`);
+  html += link('#/glossary', 'abc', 'Glossary', r.key === 'glossary');
+  html += link('#/notes', 'notebook', 'My notebook', r.key === 'notes');
   html += link('#/tutor', 'bot', 'AI Tutor (Q-Bot)', r.key === 'tutor');
   html += link('#/progress', 'chart', 'My Progress', r.key === 'progress');
   html += link('#/instructor', 'users', 'Instructor', r.key === 'instructor');
@@ -138,11 +149,35 @@ function renderNav(r = resolve()) {
 }
 
 export async function refreshProgress() {
-  if (!store.user) { progressCache = null; return null; }
+  if (!store.user) { progressCache = null; store.dueCount = 0; return null; }
   try { progressCache = await api.progress(store.user.id); } catch { progressCache = null; }
+  refreshNavBadges();
   renderNav();
   return progressCache;
 }
+
+/** Due-card count for the sidebar badge. */
+export async function refreshNavBadges(redraw = true) {
+  if (!store.user) { store.dueCount = 0; return; }
+  try { store.dueCount = (await api.reviewStats(store.user.id)).due; } catch { /* offline */ }
+  if (redraw) renderNav();
+}
+
+/* --------------------------------------------------------------- living sky chip */
+function renderSkyChip(i = skyInfo()) {
+  const chip = $('#sky-chip');
+  if (!chip) return;
+  chip.innerHTML = `<span class="sky-ic">${i.icon}</span><span class="sky-txt">${i.live ? `${i.temp}°` : esc(i.phase)}</span>`;
+  chip.title = `Living sky: ${i.phase}${i.live ? ` · ${i.temp}°C, ${i.words}${i.place ? ` in ${i.place.name}` : ''}` : ''} — click to change the mood`;
+}
+
+const PALETTE_ACTIONS = () => [
+  { t: 'Start a 25-minute focus block', sub: 'Pomodoro timer', ic: 'clock', run: () => { startFocus(25); toast('Focus block started — you’ve got this! ⏳', 'success'); } },
+  { t: 'Change the sky & ambient sound', sub: 'Living sky', ic: 'cloud', run: () => openAmbience($('#sky-chip')) },
+  { t: 'Toggle light / dark mode', sub: 'Theme', ic: 'moon', run: () => { setTheme(store.theme === 'dark' ? 'light' : 'dark'); route(); } },
+  { t: 'Study settings', sub: 'Text size, motion, contrast, install', ic: 'gear', run: () => openSettings() },
+  { t: 'Ask Q-Bot', sub: 'AI tutor drawer', ic: 'bot', run: () => openDrawer() },
+];
 
 /* --------------------------------------------------------------- shared actions */
 export function openDrawer(question) {
@@ -265,6 +300,7 @@ async function checkBackend() {
 }
 
 async function boot() {
+  applyPrefs();
   hydrateIcons();
   setTheme(store.theme === 'dark' ? 'dark' : 'light');
   renderUserChip();
@@ -274,7 +310,28 @@ async function boot() {
   $('#scrim').addEventListener('click', closeDrawer);
   $('#user-chip').addEventListener('click', () => openProfile());
   $('#theme-btn').addEventListener('click', () => { setTheme(store.theme === 'dark' ? 'light' : 'dark'); route(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+  $('#settings-btn').addEventListener('click', () => openSettings());
+  $('#search-btn').addEventListener('click', () => openPalette(PALETTE_ACTIONS()));
+  $('#sky-chip').addEventListener('click', () => openAmbience($('#sky-chip')));
+  $('#focus-btn').addEventListener('click', () => openFocus($('#focus-btn')));
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDrawer();
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') { e.preventDefault(); openPalette(PALETTE_ACTIONS()); return; }
+    if (e.target.closest('input, textarea, select, [contenteditable]') || e.ctrlKey || e.metaKey || e.altKey || !$('#modal').hidden) return;
+    if (e.key === '/') { e.preventDefault(); openPalette(PALETTE_ACTIONS()); }
+    if ((e.key === 'r' || e.key === 'R') && !location.hash.startsWith('#/review')) navigate('/review');
+  });
+  initSky();
+  renderSkyChip();
+  onSkyChange(renderSkyChip);
+  initFocus();
+  const net = () => document.documentElement.classList.toggle('is-offline', !navigator.onLine);
+  window.addEventListener('online', () => { net(); checkBackend(); toast('Back online', 'success'); });
+  window.addEventListener('offline', () => { net(); toast('You are offline — lessons you opened before still work.', 'info', 5000); });
+  net();
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) {
+    navigator.serviceWorker.register('sw.js').catch(() => { /* optional */ });
+  }
 
   checkBackend();
   try {

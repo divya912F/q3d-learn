@@ -7,12 +7,18 @@
   <meta name="description" content="Learn Quantum Computing, Machine Learning, Data Science and AI with visual labs, real simulations, quizzes and an AI tutor." />
   <meta name="theme-color" content="#f8f4ea" />
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="assets/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <script>
     // apply the saved theme before first paint
     try {
       const s = JSON.parse(localStorage.getItem('q3d-learn:v1') || '{}');
       const t = s.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
       document.documentElement.dataset.theme = t;
+      const p = JSON.parse(localStorage.getItem('q3d-prefs:v1') || '{}');
+      if (p.size) document.documentElement.dataset.size = p.size;
+      if (p.motion) document.documentElement.dataset.motion = p.motion;
     } catch (e) { document.documentElement.dataset.theme = 'light'; }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,7 +46,10 @@
     <nav class="nav" id="nav" aria-label="Main"></nav>
     <div class="sidebar-foot">
       <div class="status-pill" id="status-pill" title="Backend status"><span class="dot"></span><span id="status-text">Connecting…</span></div>
-      <button class="icon-btn" id="theme-btn" title="Switch light / dark" aria-label="Toggle theme"><i data-icon="moon"></i></button>
+      <div class="row" style="gap:6px;flex-wrap:nowrap">
+        <button class="icon-btn" id="settings-btn" title="Study settings" aria-label="Settings"><i data-icon="gear"></i></button>
+        <button class="icon-btn" id="theme-btn" title="Switch light / dark" aria-label="Toggle theme"><i data-icon="moon"></i></button>
+      </div>
     </div>
   </aside>
 
@@ -49,6 +58,9 @@
       <button class="icon-btn menu-btn" id="menu-btn" aria-label="Open menu"><i data-icon="menu"></i></button>
       <h1 class="page-title" id="page-title">Q-3D Learn</h1>
       <div class="topbar-actions">
+        <button class="search-btn" id="search-btn" aria-label="Search (Ctrl+K)"><i data-icon="search"></i><span>Search</span><span class="kbd">Ctrl K</span></button>
+        <button class="sky-chip" id="sky-chip" aria-label="Living sky and ambient sound"></button>
+        <button class="icon-btn" id="focus-btn" title="Focus timer (F)" aria-label="Focus timer"><i data-icon="clock"></i></button>
         <button class="btn btn-ghost btn-sm ask-btn" id="open-drawer"><i data-icon="bot"></i><span>Ask Q-Bot</span></button>
         <button class="user-chip" id="user-chip" aria-label="Profile"></button>
       </div>

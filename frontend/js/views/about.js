@@ -33,7 +33,7 @@ export async function render(root) {
     <span class="eyebrow">Team SRIJAN · Smart India Hackathon 2026</span>
     <h1 style="font-size:clamp(2rem,4vw,3rem);margin:14px 0 8px">Q-3D Learn</h1>
     <p class="muted" style="font-size:1.1rem;max-width:70ch">An AI-powered study platform where students learn <b>Quantum Computing</b>, <b>Machine Learning</b>, <b>Data Science</b> and <b>Artificial Intelligence</b> by <span class="hl">visualising</span> concepts in 2D and 3D, <span class="hl">building</span> circuits, models and pipelines, <span class="hl">running real computations</span>, <span class="hl">asking an AI tutor</span> and <span class="hl">experimenting</span>.</p>
-    <div class="row" style="margin-top:10px"><span class="chip">✅ 3D & interactive visualisation</span><span class="chip">✅ Real simulation & computation</span><span class="chip">✅ AI-powered, grounded tutoring</span><span class="chip">✅ 4 courses, one toolkit</span></div>
+    <div class="row" style="margin-top:10px"><span class="chip">✅ 3D & interactive visualisation</span><span class="chip">✅ Real simulation & computation</span><span class="chip">✅ AI-powered, grounded tutoring</span><span class="chip">✅ 4 courses, one toolkit</span><span class="chip">✅ Spaced-repetition review</span><span class="chip">✅ Living sky & focus timer</span><span class="chip">✅ Works offline (PWA)</span></div>
     <p class="hand" style="margin:16px 0 0;font-size:1.6rem;color:var(--primary)">💡 “Not just a simulator — a complete learning experience!”</p>
   </div>
 

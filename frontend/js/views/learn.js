@@ -3,6 +3,8 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { esc, icon, renderTex, toast, confetti, hydrateIcons } from '../ui.js';
 import { navigate, openDrawer, loadIntoBuilder, loadIntoLab, openLab, refreshProgress } from '../main.js';
+import { mountNotes } from '../study/notes.js';
+import { highlightTerms } from '../study/glossary-tips.js';
 
 export async function render(root, { params, course }) {
   const lessons = await api.lessons(course);
@@ -29,7 +31,8 @@ export async function render(root, { params, course }) {
       <div class="progress" style="margin-top:8px"><span style="width:${pct}%"></span></div></div>`
     + lessons.map((l) => `<button class="lesson-item${l.id === current ? ' active' : ''}${done.has(l.id) ? ' done' : ''}" data-id="${l.id}">
       <span class="lesson-num">${done.has(l.id) ? '✓' : l.order}</span>
-      <span class="grow"><b>${esc(l.title)}</b><small>${esc(l.topic_label)} · ${l.level} · ${l.minutes} min${best[l.id] ? ` · quiz ${best[l.id].percent}%` : ''}</small></span></button>`).join('');
+      <span class="grow"><b>${esc(l.title)}</b><small>${esc(l.topic_label)} · ${l.level} · ${l.minutes} min${best[l.id] ? ` · quiz ${best[l.id].percent}%` : ''}</small></span></button>`).join('')
+    + '<div class="card card-tight notes-box" data-notes></div>';
   list.querySelectorAll('[data-id]').forEach((b) => b.addEventListener('click', () => navigate(`/c/${course}/learn/${b.dataset.id}`)));
 
   const lesson = await api.lesson(course, current);
@@ -45,7 +48,7 @@ export async function render(root, { params, course }) {
     <p class="muted small">Score at least 2/3 to complete the lesson.</p>
     <div data-quiz></div>
     <div class="row-between" style="margin-top:14px">
-      <button class="btn btn-course" data-submit>Submit answers</button>
+      <div class="row"><button class="btn btn-course" data-submit>Submit answers</button><a class="btn btn-ghost btn-sm" href="#/review/${course}" title="Spaced-repetition flashcards">${icon('cards')} Review cards</a></div>
       <div class="row">${prevNext(lessons, lesson, course)}</div>
     </div>`;
   hydrateIcons(art);
@@ -81,6 +84,8 @@ export async function render(root, { params, course }) {
     }
   });
   hydrateIcons(blocks);
+  highlightTerms(blocks, course, { onOpenLesson: (id) => navigate(`/c/${course}/learn/${id}`) });
+  mountNotes(list.querySelector('[data-notes]'), lesson, course);
 
   const answers = new Array(lesson.quiz.length).fill(null);
   const quiz = art.querySelector('[data-quiz]');
