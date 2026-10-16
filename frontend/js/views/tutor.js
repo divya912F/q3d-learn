@@ -19,7 +19,7 @@ export async function render(root) {
       <div class="card sticky"><div class="card-head"><h3>${icon('bot')} Q-Bot</h3><span class="chip ${sys?.ai_provider === 'offline' ? 'gray' : 'green'}">${esc(sys?.ai_provider || 'offline')}</span></div>
         <p class="small" style="margin:0">${sys?.ai_provider && sys.ai_provider !== 'offline'
           ? `Answers come from <b>${esc(sys.ai_provider)}</b>, grounded on facts computed by the platform plus validated notes — to keep hallucinations out.`
-          : 'Running the built-in <b>offline study buddy</b>: validated explanations for all four courses plus live analysis of your circuits and lab results. Add <code>OPENAI_API_KEY</code> or <code>GEMINI_API_KEY</code> to <code>.env</code> for free-form answers.'}</p></div>
+          : 'Running the built-in <b>offline study buddy</b>: validated explanations for all eight courses plus live analysis of your circuits and lab results. Add <code>OPENAI_API_KEY</code> or <code>GEMINI_API_KEY</code> to <code>.env</code> for free-form answers.'}</p></div>
       <div class="card"><div class="card-head"><h3>Studying</h3></div>
         <div class="seg" data-course>${store.courses.map((c) => `<button data-c="${c.id}" class="${c.id === course ? 'active' : ''}">${esc(c.short)}</button>`).join('')}</div>
         <div class="faint tiny" style="margin:10px 0 6px">CONTEXT Q-BOT CAN SEE</div><div class="ctx-circuit" data-ctx></div></div>

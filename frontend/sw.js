@@ -1,7 +1,7 @@
 // Q-3D Learn service worker: installable, offline-capable study desk.
 // App shell -> cache first (refreshed in the background); API GETs -> network first with an offline fallback.
 // Bump VERSION whenever the shell list changes (tests/test_pwa.py checks the list is complete).
-const VERSION = 'q3d-v2.1.0';
+const VERSION = 'q3d-v2.2.0';
 const SHELL = [
   './',
   'index.html',
@@ -23,13 +23,27 @@ const SHELL = [
   'js/labs/ai-nlp.js',
   'js/labs/ai-rl.js',
   'js/labs/ai-search.js',
+  'js/labs/bc-attack.js',
+  'js/labs/bc-ledger.js',
+  'js/labs/bc-merkle.js',
+  'js/labs/cy-ciphers.js',
+  'js/labs/cy-hashing.js',
+  'js/labs/cy-rsa.js',
+  'js/labs/dl-attention.js',
+  'js/labs/dl-conv.js',
+  'js/labs/dl-dream.js',
   'js/labs/ds-explorer.js',
   'js/labs/ds-pipeline.js',
   'js/labs/ds-stats.js',
+  'js/labs/dsa-graphs.js',
+  'js/labs/dsa-sorting.js',
+  'js/labs/dsa-trees.js',
   'js/labs/kit.js',
   'js/labs/ml-classifier.js',
   'js/labs/ml-kmeans.js',
   'js/labs/ml-regression.js',
+  'js/labs/neon.js',
+  'js/labs/q-walk.js',
   'js/main.js',
   'js/quantum.js',
   'js/sky.js',
@@ -40,9 +54,11 @@ const SHELL = [
   'js/study/palette.js',
   'js/study/settings.js',
   'js/three/bloch.js',
+  'js/three/chain3d.js',
   'js/three/common.js',
   'js/three/landscape.js',
   'js/three/qsphere.js',
+  'js/three/walk3d.js',
   'js/ui.js',
   'js/views/about.js',
   'js/views/algorithms.js',

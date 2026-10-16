@@ -10,7 +10,7 @@ const REC_STYLE = { lesson: 'book', challenge: 'trophy', lab: 'flask', course: '
 export async function render(root) {
   if (!store.user) {
     root.innerHTML = `<div class="card empty" style="max-width:560px;margin:40px auto"><i data-icon="chart"></i>
-      <h3 style="color:var(--text)">Track your study journey</h3><p>Create a free learner profile to record lessons, quiz scores, challenges and experiments in all four courses — and get personalised recommendations.</p>
+      <h3 style="color:var(--text)">Track your study journey</h3><p>Create a free learner profile to record lessons, quiz scores, challenges and experiments in every course — and get personalised recommendations.</p>
       <button class="btn btn-primary" data-profile>Create profile</button></div>`;
     hydrateIcons(root);
     root.querySelector('[data-profile]').addEventListener('click', () => openProfile());

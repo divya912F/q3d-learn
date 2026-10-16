@@ -27,7 +27,7 @@ export async function render(root) {
       <span class="greeting">${hello}</span>
       <h1>Learn the future of tech by <span class="scribble">seeing it<svg viewBox="0 0 200 18" preserveAspectRatio="none"><path d="M3 12 C 40 3, 80 16, 120 8 S 180 6, 197 10" fill="none" stroke="#fcc419" stroke-width="5" stroke-linecap="round"/></svg></span>.</h1>
       ${g.line ? `<p class="weather-line">${sky.icon} ${esc(g.line)}</p>` : `<button class="weather-line link" data-sky>${sky.icon} ${esc(g.phase)} sky · <u>match the sky to your local weather</u></button>`}
-      <p class="sub">Four visual courses — <b>Quantum Computing</b>, <b>Machine Learning</b>, <b>Data Science</b> and <b>AI</b> — each with lessons, interactive labs, real simulations, challenges and an AI study buddy.</p>
+      <p class="sub">Eight visual courses — <b>Quantum</b>, <b>Machine Learning</b>, <b>Data Science</b>, <b>AI</b>, <b>DSA</b>, <b>Cybersecurity</b>, <b>Blockchain</b> and <b>Deep Learning</b> — each with lessons, interactive labs, real simulations, challenges and an AI study buddy.</p>
       <div class="row">
         <a class="btn btn-primary btn-lg" href="#/c/${p ? (Object.entries(p.courses).find(([, c]) => c.started)?.[0] || 'ml') : 'ml'}">${icon('book')} ${p && p.lessons_completed_total ? 'Continue studying' : 'Start learning'}</a>
         <a class="btn btn-ghost btn-lg" href="#/tutor">${icon('bot')} Ask Q-Bot</a>
@@ -48,7 +48,7 @@ export async function render(root) {
   <div class="today-strip">
     <a class="card today" href="#/review" style="--t:var(--pink)"><span class="ti">${icon('cards')}</span><div><b>${review ? `${review.due + Math.min(10, review.unseen)} cards to review` : 'Review cards'}</b><small>${review ? `${review.due} due · ${Math.min(10, review.unseen)} new · ${review.reviewed_today} done today` : 'Flashcards from every lesson, spaced for memory'}</small></div></a>
     <button class="card today" data-focus style="--t:var(--amber)"><span class="ti">${icon('clock')}</span><div><b>${focus ? `${focus.today_minutes} min focused today` : 'Start a focus block'}</b><small>${focus ? `${focus.week_minutes} min this week · press F` : '25 minutes of deep study, then a break'}</small></div></button>
-    <a class="card today" href="#/glossary" style="--t:var(--green)"><span class="ti">${icon('abc')}</span><div><b>Glossary</b><small>Every key term across the four courses</small></div></a>
+    <a class="card today" href="#/glossary" style="--t:var(--green)"><span class="ti">${icon('abc')}</span><div><b>Glossary</b><small>Every key term across all eight courses</small></div></a>
     <a class="card today" href="${p ? '#/progress' : '#/notes'}" style="--t:var(--violet)"><span class="ti">${icon(p ? 'award' : 'notebook')}</span><div><b>${p ? 'Earn certificates' : 'My notebook'}</b><small>${p ? 'Finish a course to unlock a printable certificate' : 'Notes you write beside lessons'}</small></div></a>
   </div>
 
@@ -82,7 +82,8 @@ export async function render(root) {
 
   <div class="section-title"><h2>Try a lab right now</h2></div>
   <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(240px,1fr))">
-    ${[['quantum', 'bloch', 'Spin a qubit in 3D'], ['ml', 'classifier', 'Watch a neural net learn'], ['ds', 'pipeline', 'Clean a messy dataset'], ['ai', 'search', 'Race BFS vs A*']].map(([c, l, t]) => {
+    ${[['quantum', 'bloch', 'Spin a qubit in 3D'], ['ml', 'classifier', 'Watch a neural net learn'], ['ds', 'pipeline', 'Clean a messy dataset'], ['ai', 'search', 'Race BFS vs A*'],
+       ['dl', 'dream', 'Make a neuron dream'], ['chain', 'ledger', 'Mine a 3D blockchain'], ['dsa', 'sorting', 'Race six sorting algorithms'], ['quantum', 'walk', 'Launch a quantum walker']].map(([c, l, t]) => {
       const lab = courses.find((x) => x.id === c)?.labs.find((x) => x.id === l);
       return lab ? `<a class="card lab-card" style="--course:var(--c-${c})" href="#/c/${c}/lab/${l}"><div class="ic"><i data-icon="${lab.icon}"></i></div><div><b>${t}</b><p>${esc(lab.title)}</p></div></a>` : '';
     }).join('')}

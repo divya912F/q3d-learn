@@ -44,6 +44,10 @@ COURSE_HELP = {
     "ml": "gradient descent, learning rates, decision boundaries, k-NN, decision trees, neural networks, k-means, overfitting…",
     "ds": "mean vs. median, standard deviation, which chart to use, correlation vs. causation, missing values, outliers, the CLT…",
     "ai": "BFS vs. DFS, A* and heuristics, minimax and alpha–beta, Q-learning, temperature in language models, responsible AI…",
+    "dsa": "Big-O, stacks and queues, quicksort vs merge sort, BST vs AVL, Dijkstra, minimum spanning trees, hash maps…",
+    "cyber": "the CIA triad, Caesar and Vigenère, frequency analysis, hashing and salts, password strength, RSA, Diffie–Hellman, SQL injection…",
+    "chain": "hash pointers, proof of work and nonces, Merkle proofs, confirmations and the 51% attack, smart contracts…",
+    "dl": "convolution and kernels, pooling, CNN parameters, dropout, transfer learning, self-attention, transformers, feature visualisation…",
 }
 
 
@@ -251,7 +255,7 @@ def offline_answer(question: str, circuit: dict | None, result: dict | None, les
 
     if lesson:
         parts.append(f"We're on **{lesson['title']}** — {lesson['summary']}")
-    topic_help = COURSE_HELP.get(course or "", "any of the four courses — quantum, machine learning, data science or AI")
+    topic_help = COURSE_HELP.get(course or "", "any of the eight courses — quantum, ML, data science, AI, DSA, cybersecurity, blockchain or deep learning")
     parts.append(f"I'm Q-Bot, running in offline mode. Ask me about {topic_help}. I can also explain **your latest lab result**.")
     parts.append("Add an OpenAI or Gemini API key in `.env` to unlock free-form answers.")
     return "\n\n".join(parts)
@@ -302,6 +306,10 @@ FOLLOW_UPS = {
     "ml": ["Why did my model overfit?", "What does the learning rate do?", "How does a neural network learn?"],
     "ds": ["When should I use the median?", "Is correlation causation?", "How do I handle missing values?"],
     "ai": ["Why is A* faster than BFS?", "What does epsilon do in Q-learning?", "What does temperature change?"],
+    "dsa": ["Why is quicksort slow on sorted input?", "When should I use a HashMap?", "How do AVL rotations work?"],
+    "cyber": ["How does frequency analysis work?", "Why add a salt to passwords?", "How does RSA work?"],
+    "chain": ["Why does editing a block break the chain?", "What is a nonce?", "What is a 51% attack?"],
+    "dl": ["What does a convolution do?", "How does self-attention work?", "What is feature visualisation?"],
 }
 
 

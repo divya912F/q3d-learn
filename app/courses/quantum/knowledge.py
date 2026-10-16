@@ -102,6 +102,11 @@ CONCEPTS: dict[str, dict] = {
         "text": "The **no-cloning theorem** says no operation can copy an arbitrary unknown quantum state. CNOT 'copies' only basis states; on a superposition it creates entanglement instead of a copy.",
         "lesson": None,
     },
+    "quantum-walk": {
+        "keys": ["quantum walk", "random walk", "walker", "ballistic"],
+        "text": "A **quantum walk** uses a qubit coin and a conditional shift. Interference makes it spread ballistically (σ ∝ t) with two peaks near ±t/√2, quadratically faster than a classical random walk (σ ∝ √t). Decoherence turns it back into the classical bell curve.",
+        "lesson": "quantum-walk",
+    },
     "decoherence": {
         "keys": ["decoher", "noise", "real hardware", "nisq"],
         "text": "Real qubits suffer **decoherence** and gate errors: interaction with the environment slowly destroys superposition and phase. Simulators like Qiskit Aer can be ideal (as here) or include noise models of real devices.",

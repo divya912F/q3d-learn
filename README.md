@@ -4,7 +4,7 @@
 
 ### Your visual study desk for the future of tech
 
-**Four interactive courses — Quantum Computing · Machine Learning · Data Science · Artificial Intelligence**
+**Eight interactive courses — Quantum Computing · Machine Learning · Data Science · Artificial Intelligence · Data Structures & Algorithms · Cybersecurity & Cryptography · Blockchain · Deep Learning & Computer Vision**
 <br>Learn concepts · Play with visual labs · Run real computations · Ask an AI tutor (text + voice) · Review with spaced repetition · Study under a living sky · Works offline
 
 [![CI](https://github.com/divya912F/q3d-learn/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
@@ -28,10 +28,14 @@ Every course is a "notebook" with the **same study toolkit**: lessons with formu
 
 | Course | Lessons | Visual labs (all computed in Python) | Challenges |
 |---|---|---|---|
-| ⚛️ **Quantum Computing** | 8 — qubits → Grover | **3D Bloch sphere** with animated gate rotations · **Circuit builder** (drag & drop, statevector + Qiskit Aer, Q-sphere, step-through, OpenQASM/Qiskit code) · **Algorithm library** (Bell, GHZ, teleportation, Deutsch–Jozsa, Bernstein–Vazirani, Grover, QFT) | 9 state-preparation puzzles graded by fidelity |
+| ⚛️ **Quantum Computing** | 9 — qubits → quantum walks | **3D quantum walk landscape** (ridgeline of probability over time vs a classical walker, with decoherence) · **3D Bloch sphere** with animated gate rotations · **Circuit builder** (drag & drop, statevector + Qiskit Aer, Q-sphere, step-through, OpenQASM/Qiskit code) · **Algorithm library** (Bell, GHZ, teleportation, Deutsch–Jozsa, Bernstein–Vazirani, Grover, QFT) | 9 state-preparation puzzles graded by fidelity |
 | 🧠 **Machine Learning** | 7 — intro → overfitting | **Regression & gradient descent** with a **3D loss landscape** and degree sweep · **Classifier playground** (logistic regression, k-NN, decision tree, neural network) with live decision boundaries, network-weight and tree diagrams · **k-means** step-through with elbow & silhouette | 6 (tune η, tiny network, spiral, shallow tree, detective questions) |
 | 📊 **Data Science** | 6 — lifecycle → CLT | **Data explorer** (table, summary stats, histograms, scatter + trend line, correlation heatmap, group compare) · **Cleaning pipeline** builder with before/after quality · **Probability lab** (distributions + Central Limit Theorem) | 6 (incl. "Data Janitor" pipeline task) |
 | 🤖 **Artificial Intelligence** | 7 — agents → responsible AI | **Pathfinding visualiser** (BFS/DFS/UCS/Greedy/A*, paint walls & mud) · **Minimax tic-tac-toe** with move scores and alpha–beta stats · **Q-learning gridworld** (values, policy arrows, reward curve) · **Next-word predictor** (n-gram LM, temperature, token-by-token) | 4 |
+| 🧩 **Data Structures & Algorithms** 🆕 | 7 — Big-O → heaps & hash tables (Java snippets) | **Sorting race** (6 algorithms side by side, spotlight, *sound of sorting*, growth chart) · **Graph explorer** (BFS/DFS/Dijkstra/Prim/Kruskal on a glowing constellation) · **Tree garden** (BST vs AVL with animated rotations) | 4 (beat 200 comparisons, Dijkstra cost, AVL height…) |
+| 🔐 **Cybersecurity & Cryptography** 🆕 | 7 — CIA triad → 2FA & backups | **Cipher wheel** (Caesar/Vigenère/XOR with χ² and index-of-coincidence cracking) · **Hash avalanche** (bit-flip heatmap, password-strength meter) · **RSA & Diffie–Hellman workshop** (extended Euclid, square-and-multiply trace) | 4 (crack Caesar & Vigenère, find *d*, build a strong password) |
+| ⛓️ **Blockchain** 🆕 | 6 — what is a blockchain → smart contracts | **3D chain & live SHA-256 miner** (tamper a block, watch the chain break, re-mine it) · **Merkle tree** with inclusion proofs · **51% attack race** (simulated double spends vs Nakamoto's whitepaper formula) | 4 |
+| 👁️ **Deep Learning & Computer Vision** 🆕 | 7 — why go deep → generative AI | **Convolution lab** (kernel slides over the image, feature maps, pooling) · **Attention lens** (glowing token-to-token arcs, multiple heads) · **Dream machine** (gradient-ascent feature visualisation, kaleidoscope mode, neuron zoo, save as PNG) | 4 |
 
 Plus, across all courses:
 
@@ -40,6 +44,14 @@ Plus, across all courses:
 - 👩‍🏫 **Instructor dashboard** — classrooms with join codes, all-courses or per-course mastery heatmaps, weak-topic alerts, sortable student table, assignments from any course with completion tracking, one-click demo class.
 - 📝 **Study theme** — warm "notebook paper" light theme with highlighter accents, sticky notes and chalkboard panels for 3D/simulations, plus a **night-study dark mode**. Responsive down to phones.
 
+### 🆕 New in v2.2 — four new courses and neon labs
+
+- **4 new courses** (DSA, Cybersecurity & Cryptography, Blockchain, Deep Learning & Computer Vision): **27 new lessons**, **16 new challenges**, tutor knowledge, flashcards and glossary terms for each.
+- **13 new visual labs** in a shared neon toolkit (`frontend/js/labs/neon.js`): glowing space backgrounds, additive light trails, two new Three.js scenes (`chain3d.js`, `walk3d.js`), all driven by real computation in Python (sorting event traces, SHA-256 proof-of-work, Merkle proofs, RSA arithmetic, convolutions, attention weights, gradient ascent).
+- **Quantum walk** lab and lesson added to the quantum course.
+
+![All new labs](docs/screenshots/new-labs.png)
+
 ### 🆕 New in v2.1 — study smarter, not longer
 
 | Feature | What it does | Why (research) |
@@ -47,7 +59,7 @@ Plus, across all courses:
 | 🌤️ **Living sky** | An animated sky behind your desk that follows **your time of day** (dawn → golden hour → night) and, if you opt in, **your real local weather** (Open-Meteo, no account). Or pick a mood: rain, snow, storm, fog, aurora, *quantum night* (floating qubits in the course colour). Optional generated ambient sound: soft rain, brown noise, ocean waves. | A calm, personal study space; colours are blended with the theme so text stays readable, and it pauses for reduced-motion users. |
 | 🃏 **Review cards (spaced repetition)** | Every quiz question and key concept becomes a flashcard (**150+ cards**). Anki-style *Again / Hard / Good / Easy* buttons with the **SM-2** scheduler; due-card badge in the sidebar; guest practice mode. | Retrieval practice and spacing are among the most robust findings in learning science. |
 | ⏳ **Focus timer** | Pomodoro blocks (25/5, 50/10, 15/3) that survive page changes, chime when done and log minutes to your XP and streak. Press **F** anywhere. | Short, protected focus blocks reduce task-switching. |
-| 🔤 **Glossary + in-lesson definitions** | 66 terms across the four courses. Key words in lessons are underlined — tap one for its definition without leaving the page. | A low-barrier "bridge" for learners missing background vocabulary. |
+| 🔤 **Glossary + in-lesson definitions** | 118 terms across all eight courses. Key words in lessons are underlined — tap one for its definition without leaving the page. | A low-barrier "bridge" for learners missing background vocabulary. |
 | ✏️ **My notebook** | A notes box beside every lesson (auto-saved to your profile, or this browser for guests), collected on one page and exportable to Markdown. | Summarising in your own words improves recall. |
 | 🔎 **Command palette** | **Ctrl/⌘ + K** (or **/**) searches every lesson, lab, challenge, glossary term and action. | Faster navigation for a big curriculum. |
 | 🏅 **Certificates** | Finish every lesson with a 60%+ quiz average to unlock a printable certificate with a verification code (`#/certificate/verify/<code>`). | Recognisable milestones for students and instructors. |
@@ -67,6 +79,12 @@ Plus, across all courses:
 | ![lesson](docs/screenshots/lesson.png) | ![tutor](docs/screenshots/ai-tutor.png) |
 | **Instructor dashboard** | **Night-study dark mode** |
 | ![instructor](docs/screenshots/instructor.png) | ![dark](docs/screenshots/dark-mode.png) |
+| **Sorting race (DSA)** | **Graph explorer (DSA)** |
+| ![sorting](docs/screenshots/dsa-sorting.png) | ![graphs](docs/screenshots/dsa-graphs.png) |
+| **3D chain & miner (Blockchain)** | **Cipher wheel (Cyber)** |
+| ![chain](docs/screenshots/chain-3d.png) | ![cipher](docs/screenshots/cyber-ciphers.png) |
+| **Dream machine (Deep learning)** | **Quantum walk (Quantum)** |
+| ![dream](docs/screenshots/dl-dream.png) | ![walk](docs/screenshots/quantum-walk.png) |
 
 | **Living sky — time of day, weather and moods** | |
 | ![living sky](docs/screenshots/living-sky.png) | |
@@ -92,7 +110,7 @@ python run.py
 
 Open **http://localhost:8000** — interactive API docs live at **http://localhost:8000/docs**.
 
-> Tip: on the Instructor page click **Load demo class** to explore analytics with 12 sample students across all four courses.
+> Tip: on the Instructor page click **Load demo class** to explore analytics with 12 sample students across all eight courses.
 
 ### Optional: AI provider
 
@@ -119,7 +137,7 @@ docker compose up --build
 
 ```bash
 pip install -r requirements-dev.txt
-pytest          # 77 tests: simulators, ML/DS/AI engines, content integrity, API, spaced repetition, offline app shell
+pytest          # 116 tests: simulators, all course engines, content integrity, API, spaced repetition, offline app shell
 ```
 
 ## 🏗️ Architecture
@@ -129,12 +147,16 @@ Student (browser: laptop / tablet / phone)
         │
 Frontend ── ES modules · Three.js (3D) · Canvas/SVG charts · Monaco · KaTeX · Web Speech/Audio API · living-sky canvas · service worker (frontend/)
         │  REST / JSON
-Backend  ── FastAPI routers: courses & learning · quantum · labs (ml/ds/ai) · tutor & classrooms   (app/api/)
-   ├── Course registry ── quantum · ml · ds · ai  (lessons, quizzes, challenges, tutor knowledge)  (app/courses/)
+Backend  ── FastAPI routers: courses & learning · quantum · labs (ml/ds/ai/dsa/cyber/chain/dl) · tutor & classrooms   (app/api/)
+   ├── Course registry ── quantum · ml · ds · ai · dsa · cyber · chain · dl  (lessons, quizzes, challenges, tutor knowledge)  (app/courses/)
    ├── Engines         ── quantum statevector + Qiskit Aer      (app/quantum/)
    │                      NumPy ML: GD regression, logistic, k-NN, CART tree, MLP+Adam, k-means   (app/courses/ml/engine.py)
    │                      Data science: datasets, stats, cleaning pipeline, CLT                    (app/courses/ds/engine.py)
    │                      AI: BFS/DFS/UCS/Greedy/A*, minimax+α–β, Q-learning, n-gram LM           (app/courses/ai/engine.py)
+   │                      DSA: sorting traces, graph algorithms, BST/AVL                           (app/courses/dsa/engine.py)
+   │                      Cyber: classical ciphers + cracking, hashing, RSA, Diffie–Hellman         (app/courses/cyber/engine.py)
+   │                      Blockchain: SHA-256 PoW mining, Merkle proofs, double-spend race         (app/courses/chain/engine.py)
+   │                      Deep learning: conv2d, pooling, attention, feature visualisation         (app/courses/dl/engine.py)
    ├── AI tutor        ── grounding (circuit + lab facts + validated notes) → OpenAI | Gemini | offline   (app/ai/)
    ├── Study tools     ── flashcard deck + SM-2, glossary, focus sessions, notes, certificates   (app/services/study.py)
    └── Analytics       ── per-course XP, mastery, streaks, recommendations, class overview         (app/services/)
@@ -147,8 +169,8 @@ q3d-learn/
 ├── app/
 │   ├── main.py · config.py · database.py · schemas.py
 │   ├── api/            learning.py · quantum.py · labs.py · community.py · study.py
-│   ├── courses/        registry.py + quantum/ · ml/ · ds/ · ai/  (content.py + engine.py each)
-│   ├── quantum/        gates · simulator · analysis · validation · qasm · qiskit_runner · algorithms
+│   ├── courses/        registry.py + quantum/ · ml/ · ds/ · ai/ · dsa/ · cyber/ · chain/ · dl/  (content.py + engine.py each)
+│   ├── quantum/        gates · simulator · analysis · validation · qasm · qiskit_runner · algorithms · walk
 │   ├── ai/tutor.py     LLM providers + grounding + offline tutor
 │   └── services/       progress.py (analytics) · study.py (flashcards, SM-2, glossary) · demo.py
 ├── frontend/
@@ -156,11 +178,11 @@ q3d-learn/
 │   ├── js/sky.js       living sky (time of day, live weather, moods, ambient sound)
 │   ├── js/study/       focus timer · command palette · glossary tips · notes · settings
 │   ├── js/views/       home · course · learn · labview · challenges · review · glossary · notes · certificate · tutor · progress · instructor · about · quantum views
-│   ├── js/labs/        ml-regression · ml-classifier · ml-kmeans · ds-explorer · ds-pipeline · ds-stats · ai-search · ai-minimax · ai-rl · ai-nlp
-│   ├── js/three/       bloch.js · qsphere.js · landscape.js
+│   ├── js/labs/        ml-regression · ml-classifier · ml-kmeans · ds-explorer · ds-pipeline · ds-stats · ai-search · ai-minimax · ai-rl · ai-nlp · dsa-* · cy-* · bc-* · dl-* · q-walk · neon.js (shared glow toolkit)
+│   ├── js/three/       bloch.js · qsphere.js · landscape.js · chain3d.js · walk3d.js
 │   ├── js/circuit/     editor.js · results.js · code.js
 │   └── vendor/three/   Three.js (bundled so 3D works offline)
-├── tests/              test_simulator.py · test_courses.py · test_api.py · test_study.py · test_pwa.py
+├── tests/              test_simulator.py · test_courses.py · test_api.py · test_study.py · test_pwa.py · test_new_courses.py
 └── Dockerfile · docker-compose.yml · .github/workflows/ci.yml
 ```
 
@@ -172,7 +194,7 @@ q3d-learn/
 
 ### Accuracy of the visuals
 
-All visuals are driven by real computation, never canned animations: the quantum views use an exact statevector simulator (Qiskit bit order, Qiskit Aer counts when installed); ML labs train real models with NumPy and record checkpoints; data-science charts come from the actual dataset statistics; AI labs replay the exact expansion order, minimax scores and Q-tables. The test suite checks known results (e.g. every quantum algorithm's outcome, A* optimality, the CLT standard error).
+All visuals are driven by real computation, never canned animations: the quantum views use an exact statevector simulator (Qiskit bit order, Qiskit Aer counts when installed); ML labs train real models with NumPy and record checkpoints; data-science charts come from the actual dataset statistics; AI labs replay the exact expansion order, minimax scores and Q-tables; sorting and graph labs replay recorded event traces; blockchain hashes are real SHA-256; attack odds are checked against the Bitcoin whitepaper table. The test suite checks known results (e.g. every quantum algorithm's outcome, A* optimality, the CLT standard error, Dijkstra vs brute force, RSA round-trips, Nakamoto's z values).
 
 ## 🔌 API overview
 
@@ -186,6 +208,11 @@ All visuals are driven by real computation, never canned animations: the quantum
 | `POST` | `/api/ml/regression` · `/api/ml/classifier` · `/api/ml/kmeans` | ML labs |
 | `POST` | `/api/ds/explore` · `/api/ds/pipeline` · `/api/ds/sample` · `/api/ds/clt` | Data-science labs |
 | `POST` | `/api/ai/search` · `/api/ai/minimax` · `/api/ai/qlearn` · `/api/ai/lm` | AI labs |
+| `POST` | `/api/quantum/walk` | Quantum walk |
+| `POST` | `/api/dsa/sort` · `/api/dsa/sort-one` · `/api/dsa/graph` · `/api/dsa/tree` | DSA labs |
+| `POST` | `/api/cyber/cipher` · `/api/cyber/hash` · `/api/cyber/password` · `/api/cyber/rsa` · `/api/cyber/dh` | Cyber labs (passwords are never logged) |
+| `POST` | `/api/chain/ledger` · `/api/chain/merkle` · `/api/chain/attack` | Blockchain labs |
+| `POST` | `/api/dl/conv` · `/api/dl/attention` · `/api/dl/dream` | Deep-learning labs |
 | `POST` | `/api/tutor/ask` | AI tutor (`course`, `circuit`, `lab` context) |
 | `GET` | `/api/progress/{user_id}` | XP, streak, per-course progress, recommendations |
 | `GET` | `/api/classrooms/{code}/overview?course=all\|ml\|…` | Instructor analytics |
@@ -209,9 +236,11 @@ curl -X POST localhost:8000/api/ml/classifier -H "Content-Type: application/json
 
 ## 🗺️ Roadmap
 
-- [ ] More courses: Cybersecurity, Cloud, Blockchain
+- [x] ~~More courses: DSA, Cybersecurity, Blockchain, Deep Learning~~ (v2.2)
+- [ ] Cloud computing and operating-systems courses
 - [ ] Noise models and real IBM Quantum hardware runs
-- [ ] CNN / image-classifier lab, transformer attention visualiser
+- [x] ~~Convolution lab, attention visualiser~~ (v2.2)
+- [ ] Train-your-own CNN in the browser
 - [ ] Multilingual content (Hindi first)
 - [ ] Shared study rooms (focus together with classmates)
 - [x] ~~Spaced repetition, focus timer, glossary, notes, certificates, offline PWA, living sky~~ (v2.1)
@@ -231,6 +260,9 @@ Contributions are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md). Good first
 - *The Quantum Education Ecosystem: A Review of Global Initiatives, Methods, and Challenges* (2026) — guided progression, visualisation with facilitation, built-in assessment, accessibility and multilingual access — https://arxiv.org/abs/2604.06293
 - Spaced practice in STEM courses, *International Journal of STEM Education* (2024) — https://link.springer.com/article/10.1186/s40594-024-00468-5
 - Offline-first, multilingual rural learning in India, ITM Web of Conferences (2026) — https://www.itm-conferences.org/articles/itmconf/pdf/2026/01/itmconf_etmis2025_01012.pdf
+- Nakamoto, S. (2008), *Bitcoin: A Peer-to-Peer Electronic Cash System* — https://bitcoin.org/bitcoin.pdf
+- Olah, Mordvintsev & Schubert (2017), *Feature Visualization*, Distill — https://distill.pub/2017/feature-visualization/
+- Vaswani et al. (2017), *Attention Is All You Need* — https://arxiv.org/abs/1706.03762
 - Weather data: [Open-Meteo](https://open-meteo.com/) (free, no API key)
 
 ## 📄 License

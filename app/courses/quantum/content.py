@@ -20,6 +20,7 @@ COURSE = {
         {"id": "bloch", "title": "3D Bloch Lab", "icon": "sphere", "description": "Apply gates to one qubit and watch them rotate the Bloch sphere."},
         {"id": "builder", "title": "Circuit Builder", "icon": "circuit", "description": "Drag-and-drop circuits, real simulation, Q-sphere, OpenQASM and Qiskit code."},
         {"id": "algorithms", "title": "Algorithm Library", "icon": "flask", "description": "Bell, GHZ, teleportation, Deutsch–Jozsa, Grover, QFT — step by step."},
+        {"id": "walk", "title": "Quantum Walk", "icon": "wave", "description": "A quantum particle spreads by interference into two glowing horns — then decoherence melts it into a classical bell curve."},
     ],
     "topics": TOPICS,
 }

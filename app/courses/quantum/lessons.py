@@ -177,6 +177,27 @@ LESSONS: list[dict] = [
             {"q": "For N = 4, how many Grover iterations give certainty?", "options": ["1", "2", "4", "16"], "answer": 0, "explain": "For 4 items one iteration rotates the state exactly onto the marked item."},
         ],
     },
+    {
+        "id": "quantum-walk",
+        "order": 9,
+        "title": "Quantum Walks: Interference in Motion",
+        "topic": "algorithms",
+        "level": "Advanced",
+        "minutes": 9,
+        "summary": "A coin-flipping walker that spreads quadratically faster than a classical one.",
+        "blocks": [
+            {"type": "text", "html": "In a <b>classical random walk</b> you flip a coin and step left or right. After t steps the walker's position forms a bell curve whose width grows like √t."},
+            {"type": "text", "html": "In a <b>quantum walk</b> the coin is a qubit. Each step applies a coin gate (e.g. Hadamard) and then a <b>conditional shift</b>: the |0⟩ part moves left, the |1⟩ part moves right. Paths interfere — some cancel, others reinforce — so the walker races outward with two bright peaks near ±t/√2."},
+            {"type": "formula", "tex": r"|\psi_{t+1}\rangle = S\,(H \otimes I)\,|\psi_t\rangle, \qquad \sigma_{\text{quantum}} \propto t \quad\text{vs}\quad \sigma_{\text{classical}} \propto \sqrt{t}"},
+            {"type": "callout", "kind": "insight", "html": "Turn up <b>decoherence</b> in the lab: measuring the position each step destroys interference and the quantum walk melts back into the classical bell curve. Quantum walks power search algorithms and model energy transport in photosynthesis."},
+            {"type": "try", "target": "lab", "lab": "walk", "label": "Launch a 60-step quantum walk", "preset": {"steps": 60}},
+        ],
+        "quiz": [
+            {"q": "The spread of a quantum walk grows like…", "options": ["√t", "t", "log t", "It doesn't spread"], "answer": 1, "explain": "Ballistic spreading — quadratically faster than the classical √t."},
+            {"q": "What makes the quantum walk differ from the classical one?", "options": ["A faster computer", "Interference between paths", "More steps", "Bigger coins"], "answer": 1, "explain": "Amplitudes add and cancel."},
+            {"q": "With full decoherence each step, the quantum walk becomes…", "options": ["Even faster", "A classical random walk", "Frozen at 0", "Two separate walks"], "answer": 1, "explain": "Measurement destroys the phase relationships."},
+        ],
+    },
 ]
 
 TOPICS = {

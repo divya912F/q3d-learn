@@ -36,6 +36,10 @@
   --c-ml: #e8590c;
   --c-ds: #0ca678;
   --c-ai: #7048e8;
+  --c-dsa: #1098ad;
+  --c-cyber: #c2255c;
+  --c-chain: #d49b00;
+  --c-dl: #ae3ec9;
 
   /* chalkboard panels (3D, circuits, games) */
   --board: #1f2b2e;
@@ -104,6 +108,10 @@
   --c-ml: #ff922b;
   --c-ds: #38d9a9;
   --c-ai: #9775fa;
+  --c-dsa: #3bc9db;
+  --c-cyber: #f06595;
+  --c-chain: #fcc419;
+  --c-dl: #da77f2;
   --board: #10171a;
   --board-2: #172124;
   --chart-grid: rgba(255, 255, 255, 0.07);
@@ -1028,3 +1036,71 @@ body:has(.focus-pill) .toasts { bottom: 84px; }
   .review-stats .stat .label { font-size: .62rem; }
   .fc-inner { min-height: 280px; }
 }
+
+/* =========================================================================
+   v2.2 — neon labs for the new courses
+   ========================================================================= */
+.card.board.neon-card { border: 1px solid rgba(140,160,255,.18); background: radial-gradient(ellipse at 20% 0%, #121633, #070914 65%);
+  box-shadow: 0 0 0 1px rgba(255,255,255,.02) inset, 0 22px 50px -28px rgba(60,40,180,.75); color: #e6e9ff; }
+.neon-card .card-head h3 { color: #e6e9ff; }
+.neon-card .card-head h3 > svg { color: var(--course); filter: drop-shadow(0 0 6px var(--course)); }
+.neon-card .legend { color: #b8bfe8; }
+.neon-card .plot { border-radius: 12px; }
+.neon-card .chip.gray { background: rgba(255,255,255,.07); color: #c5cbf0; border-color: rgba(255,255,255,.1); }
+.neon-card .player { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.1); }
+.neon-card .player .lbl { color: #b8bfe8; }
+.neon-card .player .icon-btn { background: rgba(255,255,255,.08); color: #e6e9ff; border-color: rgba(255,255,255,.14); }
+.neon-card .input, .neon-card select.input, .neon-card textarea.input { background: rgba(255,255,255,.05); color: #e6e9ff; border-color: rgba(255,255,255,.16); }
+.neon-card .muted, .neon-card .faint { color: #9aa3d6; }
+.neon-card .table th { color: #9aa3d6; } .neon-card .table td { border-color: rgba(255,255,255,.08); }
+.race-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.race-lane { display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 12px; background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07); }
+.trav-strip { margin-top: 10px; min-height: 22px; color: #b8bfe8; word-break: break-word; }
+.trav-strip .hot { color: #fff; text-shadow: 0 0 10px #fff; font-weight: 700; }
+@media (max-width: 900px) { .race-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .race-grid { grid-template-columns: 1fr; } }
+/* cipher / hashing / rsa */
+.cipher-top { grid-template-columns: minmax(260px, 1fr) minmax(0, 1.3fr); }
+.cipher-out { min-height: 120px; max-height: 300px; overflow: auto; padding: 14px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+  color: #fde2ec; font-size: .9rem; line-height: 1.7; white-space: pre-wrap; word-break: break-word; text-shadow: 0 0 8px rgba(240,101,149,.45); }
+.cipher-out .scramble { color: #66d9e8; opacity: .8; }
+.hash-grids { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.hash-hex { margin-top: 12px; color: #c5cbf0; word-break: break-all; line-height: 1.8; }
+.hash-hex .diff { color: #ff8fab; text-shadow: 0 0 8px #ff4d8d; font-weight: 700; }
+.pw-meter { height: 10px; border-radius: 10px; background: var(--surface-2); border: 1px solid var(--line); overflow: hidden; margin: 12px 0 8px; }
+.pw-meter span { display: block; height: 100%; border-radius: 10px; transition: width .5s, background .5s; box-shadow: 0 0 12px currentColor; }
+.warn-list { margin: 6px 0 0; padding-left: 4px; list-style: none; display: flex; flex-direction: column; gap: 4px; }
+.rsa-flow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rsa-flow > i { color: var(--text-3); font-style: normal; font-size: 1.2rem; }
+.rsa-node { flex: 1; min-width: 120px; padding: 10px 12px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.rsa-node small { display: block; font-size: .66rem; text-transform: uppercase; letter-spacing: .08em; color: var(--text-3); font-weight: 700; }
+.rsa-node b { display: block; font-size: 1.05rem; margin: 2px 0; word-break: break-all; }
+.rsa-node span { font-size: .72rem; color: var(--text-3); }
+.rsa-node.pub { border-color: color-mix(in srgb, var(--green) 50%, transparent); background: color-mix(in srgb, var(--green) 8%, var(--surface)); }
+.rsa-node.priv { border-color: color-mix(in srgb, var(--pink) 50%, transparent); background: color-mix(in srgb, var(--pink) 8%, var(--surface)); }
+/* blockchain */
+.chain-stage, .walk-stage { height: 360px; border-radius: 12px; overflow: hidden; background: radial-gradient(ellipse at 50% 30%, #1a1440, #05060d 70%); }
+.walk-stage { height: 420px; }
+.block-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.block-card { display: flex; flex-direction: column; gap: 8px; padding: 14px; border-radius: 14px; background: var(--surface); border: 1.5px solid var(--line); box-shadow: var(--shadow); transition: border-color .3s, box-shadow .3s; }
+.block-card.ok { border-color: color-mix(in srgb, var(--c-chain) 55%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--c-chain) 15%, transparent), 0 10px 26px -18px var(--c-chain); }
+.block-card.bad { border-color: color-mix(in srgb, var(--red) 60%, transparent); box-shadow: 0 0 0 1px color-mix(in srgb, var(--red) 18%, transparent), 0 10px 26px -14px var(--red); animation: badPulse 1.6s ease-in-out infinite; }
+@keyframes badPulse { 50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--red) 25%, transparent), 0 10px 26px -10px var(--red); } }
+.block-card.mining { border-color: var(--amber); }
+.block-card textarea { font-size: .8rem; resize: vertical; }
+.kv-line { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; font-size: .8rem; }
+.kv-line > span:first-child { color: var(--text-3); font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; font-weight: 700; }
+.zeros { color: var(--green); text-shadow: 0 0 8px color-mix(in srgb, var(--green) 60%, transparent); }
+/* deep learning */
+.kernel-bank { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 10px; }
+.kb { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px; border-radius: 12px; border: 1px solid rgba(255,255,255,.1); background: rgba(255,255,255,.03); color: #e5dbff; font: 600 .7rem var(--font-body); cursor: pointer; }
+.kb canvas { width: 100%; aspect-ratio: 1; border-radius: 8px; image-rendering: pixelated; }
+.kb:hover, .kb.active { border-color: #da77f2; box-shadow: 0 0 16px -2px #da77f2; }
+.dream-zoo { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.zoo-cell { aspect-ratio: 1; border-radius: 12px; border: 1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04) center/cover no-repeat; cursor: pointer; display: flex; align-items: flex-end; padding: 6px; image-rendering: auto; }
+.zoo-cell:not(.ready) { animation: zooWait 1.2s ease-in-out infinite; }
+@keyframes zooWait { 50% { background-color: rgba(218,119,242,.15); } }
+.zoo-cell.ready:hover { box-shadow: 0 0 18px -2px #da77f2; transform: scale(1.03); }
+.zoo-cell span { background: rgba(0,0,0,.55); border-radius: 6px; padding: 0 5px; }
+@media (max-width: 1080px) { .cipher-top { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .hash-grids { grid-template-columns: 1fr 1fr; } .chain-stage { height: 280px; } .walk-stage { height: 320px; } }

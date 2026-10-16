@@ -1,4 +1,4 @@
-// Glossary: every key term across the four courses, searchable, linked back to its lesson.
+// Glossary: every key term across every course, searchable, linked back to its lesson.
 import { api } from '../api.js';
 import { store } from '../store.js';
 import { esc, icon, hydrateIcons, markdown } from '../ui.js';

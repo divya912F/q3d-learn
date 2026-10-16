@@ -7,6 +7,11 @@ export const LAB_MODULES = {
   ml: { regression: () => import('../labs/ml-regression.js'), classifier: () => import('../labs/ml-classifier.js'), kmeans: () => import('../labs/ml-kmeans.js') },
   ds: { explorer: () => import('../labs/ds-explorer.js'), pipeline: () => import('../labs/ds-pipeline.js'), stats: () => import('../labs/ds-stats.js') },
   ai: { search: () => import('../labs/ai-search.js'), minimax: () => import('../labs/ai-minimax.js'), rl: () => import('../labs/ai-rl.js'), nlp: () => import('../labs/ai-nlp.js') },
+  quantum: { walk: () => import('../labs/q-walk.js') },
+  dsa: { sorting: () => import('../labs/dsa-sorting.js'), graphs: () => import('../labs/dsa-graphs.js'), trees: () => import('../labs/dsa-trees.js') },
+  cyber: { ciphers: () => import('../labs/cy-ciphers.js'), hashing: () => import('../labs/cy-hashing.js'), rsa: () => import('../labs/cy-rsa.js') },
+  chain: { ledger: () => import('../labs/bc-ledger.js'), merkle: () => import('../labs/bc-merkle.js'), attack: () => import('../labs/bc-attack.js') },
+  dl: { conv: () => import('../labs/dl-conv.js'), attention: () => import('../labs/dl-attention.js'), dream: () => import('../labs/dl-dream.js') },
 };
 
 export async function render(root, { params, course }) {

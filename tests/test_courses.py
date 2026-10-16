@@ -24,7 +24,7 @@ def client():
 
 # ------------------------------------------------------------------ content integrity
 def test_every_course_is_complete():
-    assert R.course_ids() == ["quantum", "ml", "ds", "ai"]
+    assert R.course_ids() == ["quantum", "ml", "ds", "ai", "dsa", "cyber", "chain", "dl"]
     for cid in R.course_ids():
         c = R.course(cid)
         assert c["labs"] and c["lessons"] >= 6 and c["challenges"] >= 4
@@ -140,7 +140,7 @@ def test_language_model_probabilities():
 
 # ------------------------------------------------------------------ API
 def test_course_api_and_challenges(client):
-    assert [c["id"] for c in client.get("/api/courses").json()] == ["quantum", "ml", "ds", "ai"]
+    assert [c["id"] for c in client.get("/api/courses").json()] == ["quantum", "ml", "ds", "ai", "dsa", "cyber", "chain", "dl"]
     ch = client.get("/api/courses/ds/challenges").json()
     assert all("compute" not in c for c in ch)  # answers stay server-side
     r = client.post("/api/courses/ai/challenges/ai-optimal/check", json={"config": {"algorithm": "astar", "heuristic": "manhattan"}}).json()

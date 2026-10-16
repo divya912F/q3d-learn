@@ -242,7 +242,7 @@ export function openProfile(force = false) {
   m.hidden = false;
   m.innerHTML = `<form class="modal-card stack" data-form>
     <div><span class="hand" style="font-size:1.4rem;color:var(--pink)">${u ? 'hello again!' : 'welcome, new student!'}</span><h2>${u ? 'Your profile' : 'Open your study notebook'}</h2>
-    <p class="muted small">${u ? 'Update your details or switch profile.' : 'Create a learner profile to save lessons, quiz scores, challenges and experiments across all four courses. No password needed.'}</p></div>
+    <p class="muted small">${u ? 'Update your details or switch profile.' : 'Create a learner profile to save lessons, quiz scores, challenges and experiments across every course. No password needed.'}</p></div>
     <label class="field">Your name<input class="input" name="name" maxlength="80" required value="${esc(u?.name || '')}" placeholder="e.g. Ada"></label>
     <div class="role-pick">
       <label><input type="radio" name="role" value="student" ${u?.role !== 'instructor' ? 'checked' : ''}> <span><b>Student</b><br><small class="faint">Learn & experiment</small></span></label>

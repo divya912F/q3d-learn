@@ -22,7 +22,7 @@ def _env(name: str, default: str = "") -> str:
 @dataclass
 class Settings:
     app_name: str = "Q-3D Learn"
-    version: str = "2.1.0"
+    version: str = "2.2.0"
     database_url: str = field(default_factory=lambda: _env("DATABASE_URL", f"sqlite:///{ROOT_DIR / 'q3d_learn.db'}"))
     frontend_dir: Path = field(default_factory=lambda: Path(_env("Q3D_FRONTEND_DIR", str(ROOT_DIR / "frontend"))))
     cors_origins: list[str] = field(default_factory=lambda: [o for o in _env("CORS_ORIGINS", "*").split(",") if o])

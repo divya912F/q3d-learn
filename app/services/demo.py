@@ -1,4 +1,4 @@
-"""Seed a demo classroom (all four courses) so the instructor dashboard can be explored immediately."""
+"""Seed a demo classroom (every course) so the instructor dashboard can be explored immediately."""
 from __future__ import annotations
 
 import random
@@ -14,9 +14,11 @@ DEMO_CODE = "DEMO42"
 STUDENTS = ["Aarav", "Diya", "Kabir", "Meera", "Rohan", "Saanvi", "Vihaan", "Ishita", "Arjun", "Ananya", "Tara", "Neel"]
 # topics that the demo class finds harder (gives the heatmap something to show)
 HARD = {"phase": 0.35, "entanglement": 0.3, "algorithms": 0.25, "bloch": 0.1, "neural": 0.3, "evaluation": 0.25, "trees": 0.1,
-        "correlation": 0.2, "probability": 0.3, "heuristics": 0.25, "rl": 0.3, "games": 0.15}
+        "correlation": 0.2, "probability": 0.3, "heuristics": 0.25, "rl": 0.3, "games": 0.15,
+        "recursion": 0.25, "graphs": 0.3, "publickey": 0.3, "consensus": 0.25, "attention": 0.35, "cnn": 0.2}
 LABS = {"quantum": ["builder", "bloch"], "ml": ["regression", "classifier", "kmeans"], "ds": ["explorer", "pipeline", "stats"],
-        "ai": ["search", "minimax", "rl", "nlp"]}
+        "ai": ["search", "minimax", "rl", "nlp"], "dsa": ["sorting", "graphs", "trees"], "cyber": ["ciphers", "hashing", "rsa"],
+        "chain": ["ledger", "merkle", "attack"], "dl": ["conv", "attention", "dream"]}
 
 
 def seed_demo_classroom(db: Session, instructor_id: int | None = None) -> str:

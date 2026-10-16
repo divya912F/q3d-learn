@@ -4,12 +4,16 @@ from __future__ import annotations
 from types import ModuleType
 
 from .ai import content as ai
+from .chain import content as chain
+from .cyber import content as cyber
+from .dl import content as dl
 from .ds import content as ds
+from .dsa import content as dsa
 from .ml import content as ml
 from .quantum import content as quantum
 
-_MODULES: dict[str, ModuleType] = {m.COURSE["id"]: m for m in (quantum, ml, ds, ai)}
-ORDER = ["quantum", "ml", "ds", "ai"]
+_MODULES: dict[str, ModuleType] = {m.COURSE["id"]: m for m in (quantum, ml, ds, ai, dsa, cyber, chain, dl)}
+ORDER = ["quantum", "ml", "ds", "ai", "dsa", "cyber", "chain", "dl"]
 
 
 def course_ids() -> list[str]:

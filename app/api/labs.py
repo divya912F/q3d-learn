@@ -16,8 +16,13 @@ from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
 from ..courses.ai import engine as ai
+from ..courses.chain import engine as chain
+from ..courses.cyber import engine as cyber
+from ..courses.dl import engine as dl
 from ..courses.ds import engine as ds
+from ..courses.dsa import engine as dsa
 from ..courses.ml import engine as ml
+from ..quantum.walk import quantum_walk
 from ..database import Experiment, User, get_session
 
 router = APIRouter(prefix="/api", tags=["labs"])
@@ -138,4 +143,117 @@ async def ai_qlearn(req: LabRequest, db: Session = Depends(get_session)):
 async def ai_lm(req: LabRequest, db: Session = Depends(get_session)):
     res = await _run(ai.language_model, req.config)
     _log(db, req.user_id, "ai", "nlp")
+    return res
+
+
+# ------------------------------------------------------------------------------- Quantum walk
+@router.post("/quantum/walk")
+async def quantum_walk_lab(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(quantum_walk, req.config)
+    _log(db, req.user_id, "quantum", "walk", f"{res['coin']} · p={res['decoherence']}")
+    return res
+
+
+# ------------------------------------------------------------------------------- DSA
+@router.post("/dsa/sort")
+async def dsa_sort(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(dsa.sort_race, req.config)
+    _log(db, req.user_id, "dsa", "sorting", f"{res['order']} n={res['n']} · winner {res['winner']}")
+    return res
+
+
+@router.post("/dsa/sort-one")
+async def dsa_sort_one(req: LabRequest):
+    return await _run(dsa.sort_trace, req.config)
+
+
+@router.post("/dsa/graph")
+async def dsa_graph(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(dsa.graph_run, req.config)
+    _log(db, req.user_id, "dsa", "graphs", res["algorithm"])
+    return res
+
+
+@router.post("/dsa/tree")
+async def dsa_tree(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(dsa.tree_ops, req.config)
+    _log(db, req.user_id, "dsa", "trees", f"{res['kind']} h={res['height']}")
+    return res
+
+
+# ------------------------------------------------------------------------------- Cybersecurity
+@router.post("/cyber/cipher")
+async def cyber_cipher(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(cyber.cipher_lab, req.config)
+    _log(db, req.user_id, "cyber", "ciphers", res["cipher"])
+    return res
+
+
+@router.post("/cyber/hash")
+async def cyber_hash(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(cyber.hash_lab, req.config)
+    _log(db, req.user_id, "cyber", "hashing", f"{res['algorithm']} avalanche {res['avalanche']}")
+    return res
+
+
+@router.post("/cyber/password")
+async def cyber_password(req: LabRequest):
+    # never logged or stored — the password only lives for this request
+    return await _run(cyber.password_strength, req.config)
+
+
+@router.post("/cyber/rsa")
+async def cyber_rsa(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(cyber.rsa_lab, req.config)
+    _log(db, req.user_id, "cyber", "rsa", f"n={res['n']}")
+    return res
+
+
+@router.post("/cyber/dh")
+async def cyber_dh(req: LabRequest):
+    return await _run(cyber.dh_lab, req.config)
+
+
+# ------------------------------------------------------------------------------- Blockchain
+@router.post("/chain/ledger")
+async def chain_ledger(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(chain.chain_lab, req.config)
+    if res["mined"]:
+        _log(db, req.user_id, "chain", "ledger", f"mined d={res['difficulty']}")
+    return res
+
+
+@router.post("/chain/merkle")
+async def chain_merkle(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(chain.merkle_lab, req.config)
+    _log(db, req.user_id, "chain", "merkle", f"{len(res['transactions'])} txs")
+    return res
+
+
+@router.post("/chain/attack")
+async def chain_attack(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(chain.attack_lab, req.config)
+    _log(db, req.user_id, "chain", "attack", f"q={res['q']} z={res['z']}")
+    return res
+
+
+# ------------------------------------------------------------------------------- Deep learning
+@router.post("/dl/conv")
+async def dl_conv(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(dl.convolve_lab, req.config)
+    _log(db, req.user_id, "dl", "conv", res["kernel_name"])
+    return res
+
+
+@router.post("/dl/attention")
+async def dl_attention(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(dl.attention_lab, req.config)
+    _log(db, req.user_id, "dl", "attention", f"{len(res['tokens'])} tokens")
+    return res
+
+
+@router.post("/dl/dream")
+async def dl_dream(req: LabRequest, db: Session = Depends(get_session)):
+    res = await _run(dl.dream_lab, req.config)
+    _log(db, req.user_id, "dl", "dream", f"L{res['layer']} c{res['channel']}")
     return res

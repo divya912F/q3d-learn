@@ -50,7 +50,7 @@ export async function render(root) {
     current = 'DEMO42';
     sessionStorage.setItem('q3d-class', current);
     sel.value = current;
-    toast('Demo classroom loaded — 12 students across all four courses', 'success');
+    toast('Demo classroom loaded — 12 students across every course', 'success');
     load();
   });
   root.querySelector('[data-new]')?.addEventListener('click', async () => {
