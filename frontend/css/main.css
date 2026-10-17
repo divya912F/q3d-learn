@@ -1145,3 +1145,36 @@ body:has(.focus-pill) .toasts { bottom: 84px; }
 .rm-build ul { margin: 2px 0 0; padding-left: 18px; }
 .rm-build li { margin: 7px 0; color: var(--text-2); font-size: .92rem; }
 .rm-build li::marker { color: var(--course); }
+
+/* ---------------- Classroom study materials ---------------- */
+.material-item { padding: 14px 16px; border-left: 3px solid var(--t, var(--pink)); }
+.material-item b { font-size: .98rem; }
+.material-item p { color: var(--text-2); line-height: 1.5; }
+.material-item a { color: var(--primary); text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+.material-item a:hover { text-decoration: underline; }
+.material-item + .material-item { margin-top: 0; }
+
+/* ---------------- Brain Map ---------------- */
+.bm-courses { gap: 4px; }
+.bm-stage { padding: 0; overflow: hidden; position: relative; }
+.bm-canvas { position: relative; width: 100%; height: min(74vh, 760px); min-height: 460px; overflow: hidden; }
+.bm-edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.bm-edges path { filter: drop-shadow(0 0 4px color-mix(in srgb, var(--course) 40%, transparent)); }
+.bm-node { position: absolute; transform: translate(-50%, -50%); background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 9px 13px; cursor: pointer; text-align: center; max-width: 180px; line-height: 1.25;
+  box-shadow: 0 6px 20px rgba(10,12,30,.1); transition: transform .12s, box-shadow .12s, border-color .12s; font: inherit; color: var(--text); }
+.bm-node:hover { transform: translate(-50%, -50%) scale(1.06); border-color: var(--nc); box-shadow: 0 10px 28px color-mix(in srgb, var(--nc) 30%, transparent); z-index: 5; }
+.bm-node b { display: block; font-size: .86rem; font-weight: 650; }
+.bm-node small { display: block; font-size: .7rem; color: var(--text-3); margin-top: 2px; }
+.bm-centre { background: var(--nc); color: #fff; border: none; padding: 16px 20px; max-width: 220px; box-shadow: 0 10px 34px color-mix(in srgb, var(--nc) 45%, transparent); }
+.bm-centre b { font-size: 1.05rem; } .bm-centre small { color: rgba(255,255,255,.85); }
+.bm-centre.bm-hub { background: var(--violet); }
+.bm-ic { display: inline-flex; width: 30px; height: 30px; border-radius: 9px; align-items: center; justify-content: center; color: #fff; margin-bottom: 4px; }
+.bm-centre .bm-ic { background: rgba(255,255,255,.22) !important; }
+.bm-course { border-top: 3px solid var(--nc); }
+.bm-topic { border-left: 3px solid var(--nc); font-weight: 600; }
+.bm-topic.open { background: color-mix(in srgb, var(--nc) 12%, var(--surface)); border-color: var(--nc); }
+.bm-lesson { max-width: 150px; font-size: .78rem; padding: 7px 11px; border-radius: 10px; }
+.bm-lesson.done { border-color: var(--green); color: var(--green); }
+.bm-hint { position: absolute; left: 14px; bottom: 10px; max-width: 70%; background: color-mix(in srgb, var(--surface) 85%, transparent); padding: 4px 10px; border-radius: 8px; }
+@media (max-width: 760px) { .bm-node { max-width: 128px; padding: 7px 9px; } .bm-node b { font-size: .76rem; } .bm-canvas { height: 68vh; } }

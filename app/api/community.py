@@ -11,8 +11,8 @@ from sqlalchemy.orm import Session
 
 from ..ai import tutor
 from ..courses import registry as R
-from ..database import Assignment, Classroom, TutorMessage, User, get_session
-from ..schemas import AssignmentCreate, ClassroomCreate, TutorRequest, UserCreate
+from ..database import Assignment, Classroom, Material, TutorMessage, User, get_session
+from ..schemas import AssignmentCreate, ClassroomCreate, MaterialCreate, TutorRequest, UserCreate
 from ..services.demo import seed_demo_classroom
 from ..services.progress import assignment_completion, classroom_overview
 
@@ -145,3 +145,50 @@ def list_assignments(code: str, db: Session = Depends(get_session)) -> list[dict
         raise HTTPException(404, "Classroom not found")
     rows = db.scalars(select(Assignment).where(Assignment.classroom_id == room.id)).all()
     return [{"id": a.id, "title": a.title, "course": a.course, "item_type": a.item_type, "item_id": a.item_id, "due": a.due} for a in rows]
+
+
+# ----------------------------------------------------------------------- study materials
+def _material_dict(m: Material) -> dict:
+    return {"id": m.id, "title": m.title, "body": m.body, "link": m.link, "course": m.course,
+            "created_at": m.created_at.isoformat() if m.created_at else None}
+
+
+@router.post("/classrooms/{code}/materials")
+def add_material(code: str, body: MaterialCreate, db: Session = Depends(get_session)) -> dict:
+    room = db.scalar(select(Classroom).where(Classroom.code == code.upper()))
+    if not room:
+        raise HTTPException(404, "Classroom not found")
+    if room.instructor_id != body.instructor_id:
+        raise HTTPException(403, "Only this classroom's instructor can add study material")
+    if not body.body.strip() and not (body.link or "").strip():
+        raise HTTPException(422, "Add some notes or a link")
+    m = Material(classroom_id=room.id, title=body.title.strip(), body=body.body.strip(),
+                 link=(body.link or "").strip() or None, course=body.course)
+    db.add(m)
+    db.commit()
+    db.refresh(m)
+    return _material_dict(m)
+
+
+@router.get("/classrooms/{code}/materials")
+def list_materials(code: str, db: Session = Depends(get_session)) -> list[dict]:
+    room = db.scalar(select(Classroom).where(Classroom.code == code.upper()))
+    if not room:
+        raise HTTPException(404, "Classroom not found")
+    rows = db.scalars(select(Material).where(Material.classroom_id == room.id).order_by(Material.created_at.desc())).all()
+    return [_material_dict(m) for m in rows]
+
+
+@router.delete("/classrooms/{code}/materials/{material_id}")
+def delete_material(code: str, material_id: int, instructor_id: int, db: Session = Depends(get_session)) -> dict:
+    room = db.scalar(select(Classroom).where(Classroom.code == code.upper()))
+    if not room:
+        raise HTTPException(404, "Classroom not found")
+    if room.instructor_id != instructor_id:
+        raise HTTPException(403, "Only this classroom's instructor can remove study material")
+    m = db.scalar(select(Material).where(Material.id == material_id, Material.classroom_id == room.id))
+    if not m:
+        raise HTTPException(404, "Material not found")
+    db.delete(m)
+    db.commit()
+    return {"ok": True}

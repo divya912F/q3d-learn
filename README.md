@@ -49,8 +49,12 @@ Plus, across all courses:
 - **137 lessons across 8 courses** — every course now runs from the absolute basics to advanced topics (**15–20 lessons each**), with formulas, quizzes and "try it in the lab" links throughout.
 - **Career roadmaps** — each course ends with a **"Where this takes you"** section: the roles you can grow into (with demand indicators), a four-stage learning ladder, projects to build, and which course to take next.
 - **190+ glossary terms & 450+ spaced-repetition flashcards**, generated from the expanded knowledge base.
+- **🧠 Brain Map** — an interactive mind map of the whole platform: a central hub branches into all eight courses, and each course expands into its topics and lessons. Tap a topic to grow its branch, tap a lesson to open it.
+- **Instructor classrooms & study materials** — instructors create a classroom (which generates a join/referral code), then share notes and resource links with it. Students join with the code and see the materials on their study desk.
+- **Q-Bot across all eight courses**, with course-aware starter questions and a hardened offline fallback, plus a **speed control on the Sorting Race** (from a slow 1 step / 2 s up to fast) so you can actually watch every comparison.
 
 ![Career roadmap](docs/screenshots/roadmap.png)
+![Brain Map](docs/screenshots/brainmap-hub.png)
 
 ### 🆕 New in v2.2 — four new courses and neon labs
 
@@ -95,6 +99,8 @@ Plus, across all courses:
 | ![dream](docs/screenshots/dl-dream.png) | ![walk](docs/screenshots/quantum-walk.png) |
 | **Career roadmap (every course)** | **15–20 lessons per course** |
 | ![roadmap](docs/screenshots/roadmap.png) | ![lessons](docs/screenshots/lessons-path.png) |
+| **Brain Map (course view)** | **Instructor classroom & study materials** |
+| ![brainmap](docs/screenshots/brainmap-course.png) | ![materials](docs/screenshots/instructor-materials.png) |
 
 | **Living sky — time of day, weather and moods** | |
 | ![living sky](docs/screenshots/living-sky.png) | |
@@ -227,6 +233,7 @@ All visuals are driven by real computation, never canned animations: the quantum
 | `POST` | `/api/tutor/ask` | AI tutor (`course`, `circuit`, `lab` context) |
 | `GET` | `/api/progress/{user_id}` | XP, streak, per-course progress, recommendations |
 | `GET` | `/api/classrooms/{code}/overview?course=all\|ml\|…` | Instructor analytics |
+| `POST`/`GET`/`DEL` | `/api/classrooms/{code}/materials` | Classroom study materials (instructor-owned) |
 | `GET` | `/api/review/{user_id}/due` · `POST /api/review/{user_id}/grade` | Spaced-repetition queue and SM-2 grading |
 | `GET` | `/api/glossary?course=` · `/api/review/deck` | Glossary terms and the full flashcard deck |
 | `POST` | `/api/focus` · `GET /api/focus/{user_id}` | Log focus blocks, weekly summary |

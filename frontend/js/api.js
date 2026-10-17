@@ -62,6 +62,9 @@ export const api = {
   demoClassroom: (uid) => request('POST', `/api/classrooms/demo${uid ? `?instructor_id=${uid}` : ''}`),
   overview: (code, course = 'all') => request('GET', `/api/classrooms/${encodeURIComponent(code)}/overview?course=${course}`),
   addAssignment: (code, body) => request('POST', `/api/classrooms/${encodeURIComponent(code)}/assignments`, body),
+  materials: (code) => request('GET', `/api/classrooms/${encodeURIComponent(code)}/materials`),
+  addMaterial: (code, body) => request('POST', `/api/classrooms/${encodeURIComponent(code)}/materials`, body),
+  deleteMaterial: (code, id, instructor_id) => request('DELETE', `/api/classrooms/${encodeURIComponent(code)}/materials/${id}?instructor_id=${instructor_id}`),
 
   // study tools
   glossary: (course) => request('GET', `/api/glossary${course ? `?course=${course}` : ''}`),

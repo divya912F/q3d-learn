@@ -97,6 +97,30 @@ def test_demo_classroom(client):
     assert {"foundations", "regression", "classification", "trees", "neural", "clustering", "evaluation"} <= set(ml["columns"])
 
 
+def test_classroom_materials(client):
+    teacher = client.post("/api/users", json={"name": "Prof M", "role": "instructor"}).json()
+    code = client.post("/api/classrooms", json={"name": "Materials 101", "instructor_id": teacher["id"]}).json()["code"]
+    # instructor shares a material
+    m = client.post(f"/api/classrooms/{code}/materials",
+                    json={"title": "Week 1 notes", "body": "Read chapter 2", "link": "https://example.com/x.pdf",
+                          "course": "dsa", "instructor_id": teacher["id"]}).json()
+    assert m["id"] and m["title"] == "Week 1 notes" and m["link"].endswith(".pdf")
+    # anyone with the code can list it (students)
+    mats = client.get(f"/api/classrooms/{code}/materials").json()
+    assert len(mats) == 1 and mats[0]["course"] == "dsa"
+    # a different user cannot add or delete
+    other = client.post("/api/users", json={"name": "Imposter", "role": "instructor"}).json()
+    assert client.post(f"/api/classrooms/{code}/materials",
+                       json={"title": "x", "body": "y", "instructor_id": other["id"]}).status_code == 403
+    assert client.request("DELETE", f"/api/classrooms/{code}/materials/{m['id']}?instructor_id={other['id']}").status_code == 403
+    # empty material rejected
+    assert client.post(f"/api/classrooms/{code}/materials",
+                       json={"title": "blank", "body": "", "link": None, "instructor_id": teacher["id"]}).status_code == 422
+    # owner can delete
+    assert client.request("DELETE", f"/api/classrooms/{code}/materials/{m['id']}?instructor_id={teacher['id']}").json()["ok"]
+    assert client.get(f"/api/classrooms/{code}/materials").json() == []
+
+
 def test_saved_circuits(client, user):
     client.post("/api/circuits", json={**BELL, "user_id": user["id"], "title": "Bell"})
     rows = client.get(f"/api/circuits/user/{user['id']}").json()

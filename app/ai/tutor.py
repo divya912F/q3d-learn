@@ -377,8 +377,10 @@ def ask(question: str, circuit: dict | None = None, result: dict | None = None, 
         messages.append({"role": "user", "content": question})
         try:
             answer = _openai(messages) if provider == "openai" else _gemini(messages)
-            return {"answer": answer, "provider": provider, "facts": facts, "suggestions": suggestions(circuit, result, concepts, course, lab)}
-        except (urllib.error.URLError, KeyError, IndexError, TimeoutError, ValueError) as exc:
+            if answer and answer.strip():
+                return {"answer": answer, "provider": provider, "facts": facts, "suggestions": suggestions(circuit, result, concepts, course, lab)}
+            raise ValueError("empty response from provider")
+        except Exception as exc:  # noqa: BLE001 - any provider/network failure must fall back, never 500
             log.warning("AI provider %s failed, falling back to offline tutor: %s", provider, exc)
             notice = f"The {provider} API could not be reached, so the offline tutor answered."
 

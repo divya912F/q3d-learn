@@ -18,7 +18,7 @@ const NAMES = { bubble: 'Bubble', insertion: 'Insertion', selection: 'Selection'
 const HUES = { bubble: '#ff6b9d', insertion: '#3bc9db', selection: '#fcc419', merge: '#69db7c', quick: '#b197fc', heap: '#ff922b' };
 
 export async function mount(root, { preset = {}, lock = [] } = {}) {
-  const st = { order: 'random', n: 32, algorithm: 'quick', speed: 60, sound: false, ...preset };
+  const st = { order: 'random', n: 32, algorithm: 'quick', speed: 1, sound: false, ...preset };
   root.innerHTML = `<div class="lab-grid">
     <div class="stack"><div class="card controls" data-ctl></div>
       <div class="row"><button class="btn btn-course grow" data-run>${icon('play')} Race!</button><button class="icon-btn" data-reset title="Restart">${icon('reset')}</button></div>
@@ -40,7 +40,7 @@ export async function mount(root, { preset = {}, lock = [] } = {}) {
     { type: 'seg', key: 'order', label: 'Input order', options: [['random', 'Random'], ['reversed', 'Reversed'], ['nearly', 'Nearly'], ['few', 'Few unique']] },
     { type: 'slider', key: 'n', label: 'Items', min: 8, max: 64, step: 4 },
     { type: 'select', key: 'algorithm', label: 'Spotlight algorithm', options: Object.entries(NAMES).map(([k, v]) => [k, `${v} sort`]) },
-    { type: 'slider', key: 'speed', label: 'Speed', min: 5, max: 400, step: 5, fmt: (v) => `${v} steps/s` },
+    { type: 'slider', key: 'speed', label: 'Speed', min: 0.5, max: 40, step: 0.5, fmt: (v) => (v < 1 ? `${Math.round(1 / v)}s per step` : `${v} steps/s`) },
     { type: 'toggle', key: 'sound', label: 'Sound of sorting (spotlight)' },
   ], st, (k, v, live) => {
     if (live) return;
@@ -59,7 +59,7 @@ export async function mount(root, { preset = {}, lock = [] } = {}) {
   });
   const growth = new Plot($('[data-growth]'), { height: 220 });
 
-  let data = null, sims = {}, stop = null, clock = 0, finishOrder = [];
+  let data = null, sims = {}, stop = null, clock = 0, finishOrder = [], acc = 0;
   let audio = null;
 
   function sim(run) {
@@ -132,7 +132,10 @@ export async function mount(root, { preset = {}, lock = [] } = {}) {
   function frame(t) {
     const dt = (t - clock) / 1000;
     clock = t;
-    const budget = Math.max(1, Math.round(st.speed * Math.min(dt, 0.1)));
+    // fractional accumulator so very slow speeds (e.g. 1 step every 2 s) work
+    acc += st.speed * Math.min(dt, 0.25);
+    const budget = Math.floor(acc);
+    acc -= budget;
     let allDone = true;
     for (const [a, s] of Object.entries(sims)) {
       for (let i = 0; i < budget && !s.finished; i++) {
@@ -163,12 +166,13 @@ export async function mount(root, { preset = {}, lock = [] } = {}) {
     spot.drawFn = () => drawBars(spot, sims.__spot, HUES[st.algorithm], true);
     Object.keys(NAMES).forEach((a) => { lanes[a].plot.drawFn = () => drawBars(lanes[a].plot, sims[a], HUES[a]); });
     drawGrowth();
-    clock = performance.now();
+    clock = 0;
+    acc = 0;
     if (reducedMotion()) {
       Object.values(sims).forEach((s) => { while (!s.finished) step(s); });
       finishOrder = [...data.runs].sort((a, b) => a.steps - b.steps).map((r) => r.algorithm);
-      frame(clock);
-    } else stop = loop((t) => frame(t + clock));
+      frame(0);
+    } else stop = loop(frame);  // loop() passes elapsed-ms-since-start as t
   }
 
   function drawGrowth() {
@@ -214,7 +218,7 @@ export async function mount(root, { preset = {}, lock = [] } = {}) {
     $('[data-explain]').textContent = text[st.algorithm];
   }
   $('[data-run]').addEventListener('click', run);
-  $('[data-reset]').addEventListener('click', () => { if (data) { sims = Object.fromEntries(data.runs.map((r) => [r.algorithm, sim(r)])); finishOrder = []; spotlight(); stop?.(); clock = performance.now(); stop = loop((t) => frame(t + clock)); } });
+  $('[data-reset]').addEventListener('click', () => { if (data) { sims = Object.fromEntries(data.runs.map((r) => [r.algorithm, sim(r)])); finishOrder = []; acc = 0; spotlight(); stop?.(); clock = 0; stop = loop(frame); } });
   explain();
   await run();
   return {

@@ -116,8 +116,26 @@ function renderOverview(body, o, lessons, challenges, reload) {
           <div class="row" style="flex-wrap:nowrap"><input class="input" type="date" name="due"><button class="btn btn-primary btn-sm">${icon('plus')} Assign</button></div></form>
       </div>
     </div>
+    <div class="card" style="margin-top:18px" data-materials><div class="card-head"><h3>${icon('book')} Study materials</h3><span class="faint tiny">shared with everyone who joins with code <b class="mono">${o.classroom.code}</b></span></div><div data-mat-list><div class="faint small">Loading…</div></div>
+      ${store.user?.role === 'instructor' ? `<hr><form class="stack" style="gap:8px" data-mat-form>
+        <input class="input" name="title" placeholder="Title (e.g. Week 3 — Sorting notes)" required maxlength="160">
+        <textarea class="input" name="body" rows="3" placeholder="Notes / instructions for your students (optional if you add a link)"></textarea>
+        <div class="row" style="flex-wrap:nowrap;gap:8px"><input class="input grow" name="link" type="url" placeholder="Optional link (PDF, video, Drive, website)…">
+        <select class="input" name="course" style="width:auto"><option value="">Any course</option>${store.courses.map((c) => `<option value="${c.id}">${esc(c.short)}</option>`).join('')}</select>
+        <button class="btn btn-primary btn-sm">${icon('plus')} Share</button></div></form>` : ''}</div>
     <div class="card" style="margin-top:18px"><div class="card-head"><h3>${icon('users')} Students</h3><span class="faint tiny">click a column to sort</span></div><div style="overflow-x:auto" data-table></div></div>`;
   hydrateIcons(body);
+  renderMaterials(body, o.classroom.code);
+  body.querySelector('[data-mat-form]')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const f = e.target;
+    try {
+      await api.addMaterial(o.classroom.code, { title: f.title.value, body: f.body.value, link: f.link.value || null, course: f.course.value || null, instructor_id: store.user.id });
+      f.reset();
+      toast('Material shared with your class', 'success');
+      renderMaterials(body, o.classroom.code);
+    } catch (err) { toast(err.message, 'error'); }
+  });
   if (innerWidth < 1080) body.querySelector('[data-two]').style.gridTemplateColumns = '1fr';
   body.querySelector('[data-assign]').addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -150,6 +168,25 @@ function renderOverview(body, o, lessons, challenges, reload) {
     }));
   };
   drawTable();
+}
+
+async function renderMaterials(body, code) {
+  const wrap = body.querySelector('[data-mat-list]');
+  if (!wrap) return;
+  let mats = [];
+  try { mats = await api.materials(code); } catch { wrap.innerHTML = '<div class="faint small">Could not load materials.</div>'; return; }
+  const canEdit = store.user?.role === 'instructor';
+  wrap.innerHTML = mats.length ? `<div class="stack" style="gap:10px">${mats.map((m) => `
+    <div class="material-item"><div class="row-between"><b>${esc(m.title)}</b>${m.course ? `<span class="chip gray">${esc(store.courseMeta(m.course)?.short || m.course)}</span>` : ''}</div>
+      ${m.body ? `<p class="small" style="margin:4px 0;white-space:pre-wrap">${esc(m.body)}</p>` : ''}
+      <div class="row-between"><div>${m.link ? `<a class="small" href="${esc(m.link)}" target="_blank" rel="noopener">${icon('link')} Open resource</a>` : ''}</div>
+      ${canEdit ? `<button class="icon-btn btn-sm" data-del="${m.id}" title="Remove">${icon('trash')}</button>` : ''}</div></div>`).join('')}</div>`
+    : '<div class="faint small">No study materials yet. Share notes, links or resources with your class below.</div>';
+  hydrateIcons(wrap);
+  wrap.querySelectorAll('[data-del]').forEach((b) => b.addEventListener('click', async () => {
+    try { await api.deleteMaterial(code, b.dataset.del, store.user.id); renderMaterials(body, code); }
+    catch (err) { toast(err.message, 'error'); }
+  }));
 }
 
 function cell(v) {

@@ -88,3 +88,11 @@ class AssignmentCreate(BaseModel):
     item_type: Literal["lesson", "challenge"]
     item_id: str
     due: str | None = None
+
+
+class MaterialCreate(BaseModel):
+    title: str = Field(..., min_length=1, max_length=160)
+    body: str = Field("", max_length=20000)
+    link: str | None = Field(None, max_length=500)
+    course: str | None = None
+    instructor_id: int

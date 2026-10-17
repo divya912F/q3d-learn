@@ -3,14 +3,18 @@ import { api } from '../api.js';
 import { store } from '../store.js';
 import { esc, icon, markdown, toast, initials, hydrateIcons } from '../ui.js';
 
-const WELCOME = "Hi! I'm **Q-Bot**, your study buddy for Quantum Computing, Machine Learning, Data Science and AI. Ask me about any concept — or about the lab you're using: I can see your circuit, model or experiment and its *real* results, so my explanations stay grounded.";
+const WELCOME = "Hi! I'm **Q-Bot**, your study buddy across all eight courses — Quantum, Machine Learning, Data Science, AI, Data Structures & Algorithms, Cybersecurity, Blockchain and Deep Learning. Ask me about any concept — or about the lab you're using: I can see your circuit, model or experiment and its *real* results, so my explanations stay grounded.";
 const STARTERS_BY_COURSE = {
   quantum: ['What happens when I apply H to |0⟩?', 'What is entanglement?', 'Explain my circuit step by step'],
   ml: ['What does the learning rate do?', 'Explain my latest lab result', 'What is overfitting?'],
   ds: ['When should I use the median?', 'Is correlation causation?', 'Explain my latest lab result'],
   ai: ['Why is A* faster than BFS?', 'What does epsilon do in Q-learning?', 'Explain my latest lab result'],
+  dsa: ['What is Big-O notation?', 'When does binary search work?', 'What is dynamic programming?'],
+  cyber: ['What is phishing?', 'How does RSA work?', 'Why salt a password hash?'],
+  chain: ['What is proof of work?', 'Explain re-entrancy', 'Proof of work vs proof of stake?'],
+  dl: ['What is a transformer?', 'How does backpropagation work?', 'What is a convolution?'],
 };
-const STARTERS = ['What is machine learning?', 'What is a qubit?', 'How does A* search work?'];
+const STARTERS = ['What is a qubit?', 'What is dynamic programming?', 'How does A* search work?', 'What is a transformer?'];
 
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 

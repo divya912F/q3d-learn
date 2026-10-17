@@ -63,6 +63,7 @@ function resolve() {
     about: ['About the Project', () => import('./views/about.js')],
     review: ['Review cards', () => import('./views/review.js')],
     glossary: ['Glossary', () => import('./views/glossary.js')],
+    brainmap: ['Brain Map', () => import('./views/brainmap.js')],
     notes: ['My notebook', () => import('./views/notes.js')],
     certificate: ['Certificate', () => import('./views/certificate.js')],
   };
@@ -139,6 +140,7 @@ function renderNav(r = resolve()) {
   html += '<div class="nav-label">Study tools</div>';
   html += link('#/review', 'cards', 'Review cards', r.key === 'review', '').replace('</span></a>', `</span>${store.dueCount ? `<span class="badge" title="cards due">${store.dueCount}</span>` : ''}</a>`);
   html += link('#/glossary', 'abc', 'Glossary', r.key === 'glossary');
+  html += link('#/brainmap', 'mindmap', 'Brain Map', r.key === 'brainmap');
   html += link('#/notes', 'notebook', 'My notebook', r.key === 'notes');
   html += link('#/tutor', 'bot', 'AI Tutor (Q-Bot)', r.key === 'tutor');
   html += link('#/progress', 'chart', 'My Progress', r.key === 'progress');

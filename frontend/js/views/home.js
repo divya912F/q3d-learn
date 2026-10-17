@@ -18,6 +18,8 @@ export async function render(root) {
   const [p, review, focus] = store.user
     ? await Promise.all([refreshProgress(), api.reviewStats(store.user.id).catch(() => null), api.focus(store.user.id).catch(() => null)])
     : [null, null, null];
+  const classCode = store.user?.classroom_code;
+  const materials = classCode ? await api.materials(classCode).catch(() => []) : [];
   const g = greeting(store.user ? store.user.name.split(' ')[0] : '');
   const hello = `${esc(g.hello.toLowerCase())} ✏️`;
   const sky = skyInfo();
@@ -51,6 +53,14 @@ export async function render(root) {
     <a class="card today" href="#/glossary" style="--t:var(--green)"><span class="ti">${icon('abc')}</span><div><b>Glossary</b><small>Every key term across all eight courses</small></div></a>
     <a class="card today" href="${p ? '#/progress' : '#/notes'}" style="--t:var(--violet)"><span class="ti">${icon(p ? 'award' : 'notebook')}</span><div><b>${p ? 'Earn certificates' : 'My notebook'}</b><small>${p ? 'Finish a course to unlock a printable certificate' : 'Notes you write beside lessons'}</small></div></a>
   </div>
+
+  ${classCode ? `<div class="section-title"><h2>From your classroom</h2><span class="hand">shared by your instructor · ${esc(classCode)}</span></div>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+    ${materials.length ? materials.map((m) => `<div class="card material-item" style="--t:var(--pink)"><div class="row-between"><b>${esc(m.title)}</b>${m.course ? `<span class="chip gray">${esc(store.courseMeta(m.course)?.short || m.course)}</span>` : ''}</div>
+      ${m.body ? `<p class="small" style="margin:6px 0;white-space:pre-wrap">${esc(m.body)}</p>` : ''}
+      ${m.link ? `<a class="small" href="${esc(m.link)}" target="_blank" rel="noopener">${icon('link')} Open resource</a>` : ''}</div>`).join('')
+    : '<div class="card empty"><i data-icon="book"></i><div>No study materials shared yet. When your instructor posts notes or links, they appear here.</div></div>'}
+  </div>` : ''}
 
   <div class="section-title"><h2>Your courses</h2><span class="hand">pick a notebook →</span></div>
   <div class="course-grid">${courses.map((c) => {

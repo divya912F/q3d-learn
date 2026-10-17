@@ -129,6 +129,19 @@ class Assignment(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
+class Material(Base):
+    """A study resource an instructor shares with a classroom (notes and/or a link)."""
+
+    __tablename__ = "materials"
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    classroom_id: Mapped[int] = mapped_column(ForeignKey("classrooms.id", ondelete="CASCADE"), index=True)
+    title: Mapped[str] = mapped_column(String(160))
+    body: Mapped[str] = mapped_column(Text, default="")
+    link: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    course: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+
+
 class ReviewCard(Base):
     """Spaced-repetition state of one flashcard for one learner (SM-2)."""
 
