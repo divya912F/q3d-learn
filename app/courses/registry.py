@@ -11,6 +11,7 @@ from .ds import content as ds
 from .dsa import content as dsa
 from .ml import content as ml
 from .quantum import content as quantum
+from .roadmaps import ROADMAPS
 
 _MODULES: dict[str, ModuleType] = {m.COURSE["id"]: m for m in (quantum, ml, ds, ai, dsa, cyber, chain, dl)}
 ORDER = ["quantum", "ml", "ds", "ai", "dsa", "cyber", "chain", "dl"]
@@ -29,14 +30,14 @@ def courses() -> list[dict]:
     for cid in ORDER:
         m = _MODULES[cid]
         out.append({**m.COURSE, "lessons": len(m.LESSONS), "challenges": len(m.CHALLENGES),
-                    "minutes": sum(l["minutes"] for l in m.LESSONS)})
+                    "minutes": sum(l["minutes"] for l in m.LESSONS), "roadmap": ROADMAPS.get(cid)})
     return out
 
 
 def course(course_id: str) -> dict | None:
     m = module(course_id)
     return None if m is None else {**m.COURSE, "lessons": len(m.LESSONS), "challenges": len(m.CHALLENGES),
-                                   "minutes": sum(l["minutes"] for l in m.LESSONS)}
+                                   "minutes": sum(l["minutes"] for l in m.LESSONS), "roadmap": ROADMAPS.get(course_id)}
 
 
 def lessons(course_id: str) -> list[dict]:

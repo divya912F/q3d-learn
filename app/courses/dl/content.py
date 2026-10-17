@@ -22,6 +22,10 @@ COURSE = {
          "description": "Type a sentence and see which words each attention head looks at — arcs, heatmaps and temperature."},
         {"id": "dream", "title": "Dream Machine", "icon": "sparkle",
          "description": "Gradient ascent paints the image a neuron loves most — surreal, psychedelic feature visualisations."},
+        {"id": "diffusion", "title": "Diffusion Studio", "icon": "sparkle",
+         "description": "Turn pure noise into a shape step by step — the same idea behind modern image generators, in 2-D so you can watch it."},
+        {"id": "embeddings", "title": "Word Embeddings", "icon": "compass",
+         "description": "Fly through a galaxy of words where direction is meaning: king − man + woman ≈ queen."},
     ],
     "topics": {
         "deep": "Deep networks", "images": "Images as tensors", "conv": "Convolution", "cnn": "CNN architectures",
@@ -221,3 +225,10 @@ KNOWLEDGE = {
     "generative": {"keys": ["generative", "gan", "diffusion", "stable diffusion", "deepfake", "dall"], "lesson": "dl-generative",
                    "text": "**Generative models** create new data: GANs (generator vs discriminator), **diffusion models** (learn to remove noise step by step) and LLMs. Use them responsibly — label AI content and avoid deceptive deepfakes."},
 }
+
+# --- v2.3 expanded curriculum (see extra.py) ---
+from .extra import KNOWLEDGE_EXTRA, LESSONS_EXTRA, TOPICS_EXTRA  # noqa: E402
+
+COURSE["topics"].update(TOPICS_EXTRA)
+LESSONS = LESSONS + LESSONS_EXTRA
+KNOWLEDGE.update(KNOWLEDGE_EXTRA)

@@ -28,14 +28,14 @@ Every course is a "notebook" with the **same study toolkit**: lessons with formu
 
 | Course | Lessons | Visual labs (all computed in Python) | Challenges |
 |---|---|---|---|
-| ⚛️ **Quantum Computing** | 9 — qubits → quantum walks | **3D quantum walk landscape** (ridgeline of probability over time vs a classical walker, with decoherence) · **3D Bloch sphere** with animated gate rotations · **Circuit builder** (drag & drop, statevector + Qiskit Aer, Q-sphere, step-through, OpenQASM/Qiskit code) · **Algorithm library** (Bell, GHZ, teleportation, Deutsch–Jozsa, Bernstein–Vazirani, Grover, QFT) | 9 state-preparation puzzles graded by fidelity |
-| 🧠 **Machine Learning** | 7 — intro → overfitting | **Regression & gradient descent** with a **3D loss landscape** and degree sweep · **Classifier playground** (logistic regression, k-NN, decision tree, neural network) with live decision boundaries, network-weight and tree diagrams · **k-means** step-through with elbow & silhouette | 6 (tune η, tiny network, spiral, shallow tree, detective questions) |
-| 📊 **Data Science** | 6 — lifecycle → CLT | **Data explorer** (table, summary stats, histograms, scatter + trend line, correlation heatmap, group compare) · **Cleaning pipeline** builder with before/after quality · **Probability lab** (distributions + Central Limit Theorem) | 6 (incl. "Data Janitor" pipeline task) |
-| 🤖 **Artificial Intelligence** | 7 — agents → responsible AI | **Pathfinding visualiser** (BFS/DFS/UCS/Greedy/A*, paint walls & mud) · **Minimax tic-tac-toe** with move scores and alpha–beta stats · **Q-learning gridworld** (values, policy arrows, reward curve) · **Next-word predictor** (n-gram LM, temperature, token-by-token) | 4 |
-| 🧩 **Data Structures & Algorithms** 🆕 | 7 — Big-O → heaps & hash tables (Java snippets) | **Sorting race** (6 algorithms side by side, spotlight, *sound of sorting*, growth chart) · **Graph explorer** (BFS/DFS/Dijkstra/Prim/Kruskal on a glowing constellation) · **Tree garden** (BST vs AVL with animated rotations) | 4 (beat 200 comparisons, Dijkstra cost, AVL height…) |
-| 🔐 **Cybersecurity & Cryptography** 🆕 | 7 — CIA triad → 2FA & backups | **Cipher wheel** (Caesar/Vigenère/XOR with χ² and index-of-coincidence cracking) · **Hash avalanche** (bit-flip heatmap, password-strength meter) · **RSA & Diffie–Hellman workshop** (extended Euclid, square-and-multiply trace) | 4 (crack Caesar & Vigenère, find *d*, build a strong password) |
-| ⛓️ **Blockchain** 🆕 | 6 — what is a blockchain → smart contracts | **3D chain & live SHA-256 miner** (tamper a block, watch the chain break, re-mine it) · **Merkle tree** with inclusion proofs · **51% attack race** (simulated double spends vs Nakamoto's whitepaper formula) | 4 |
-| 👁️ **Deep Learning & Computer Vision** 🆕 | 7 — why go deep → generative AI | **Convolution lab** (kernel slides over the image, feature maps, pooling) · **Attention lens** (glowing token-to-token arcs, multiple heads) · **Dream machine** (gradient-ascent feature visualisation, kaleidoscope mode, neuron zoo, save as PNG) | 4 |
+| ⚛️ **Quantum Computing** | 18 — qubits → error correction & Shor | **3D quantum walk landscape** (ridgeline of probability over time vs a classical walker, with decoherence) · **3D Bloch sphere** with animated gate rotations · **Circuit builder** (drag & drop, statevector + Qiskit Aer, Q-sphere, step-through, OpenQASM/Qiskit code) · **Algorithm library** (Bell, GHZ, teleportation, Deutsch–Jozsa, Bernstein–Vazirani, Grover, QFT) | 9 state-preparation puzzles graded by fidelity |
+| 🧠 **Machine Learning** | 18 — intro → SVMs, ensembles & MLOps | **Regression & gradient descent** with a **3D loss landscape** and degree sweep · **Classifier playground** (logistic regression, k-NN, decision tree, neural network) with live decision boundaries, network-weight and tree diagrams · **k-means** step-through with elbow & silhouette | 6 (tune η, tiny network, spiral, shallow tree, detective questions) |
+| 📊 **Data Science** | 17 — lifecycle → A/B tests, time series & ethics | **Data explorer** (table, summary stats, histograms, scatter + trend line, correlation heatmap, group compare) · **Cleaning pipeline** builder with before/after quality · **Probability lab** (distributions + Central Limit Theorem) | 6 (incl. "Data Janitor" pipeline task) |
+| 🤖 **Artificial Intelligence** | 17 — agents → MDPs, transformers & alignment | **Pathfinding visualiser** (BFS/DFS/UCS/Greedy/A*, paint walls & mud) · **Minimax tic-tac-toe** with move scores and alpha–beta stats · **Q-learning gridworld** (values, policy arrows, reward curve) · **Next-word predictor** (n-gram LM, temperature, token-by-token) | 4 |
+| 🧩 **Data Structures & Algorithms** | 17 — Big-O → DP, greedy & interview patterns (Java snippets) | **Sorting race** (6 algorithms side by side, spotlight, *sound of sorting*, growth chart) · **Graph explorer** (BFS/DFS/Dijkstra/Prim/Kruskal on a glowing constellation) · **Tree garden** (BST vs AVL with animated rotations) | 4 (beat 200 comparisons, Dijkstra cost, AVL height…) |
+| 🔐 **Cybersecurity & Cryptography** | 17 — CIA triad → web, network, PKI & incident response | **Cipher wheel** (Caesar/Vigenère/XOR with χ² and index-of-coincidence cracking) · **Hash avalanche** (bit-flip heatmap, password-strength meter) · **RSA & Diffie–Hellman workshop** (extended Euclid, square-and-multiply trace) | 4 (crack Caesar & Vigenère, find *d*, build a strong password) |
+| ⛓️ **Blockchain** | 16 — hashing → PoS, DeFi, scaling & contract security | **3D chain & live SHA-256 miner** (tamper a block, watch the chain break, re-mine it) · **Merkle tree** with inclusion proofs · **51% attack race** (simulated double spends vs Nakamoto's whitepaper formula) | 4 |
+| 👁️ **Deep Learning & Computer Vision** | 17 — the neuron → transformers, diffusion & transfer learning | **Convolution lab** (kernel slides over the image, feature maps, pooling) · **Attention lens** (glowing token-to-token arcs, multiple heads) · **Dream machine** (gradient-ascent feature visualisation, kaleidoscope mode, neuron zoo, save as PNG) | 4 |
 
 Plus, across all courses:
 
@@ -43,6 +43,14 @@ Plus, across all courses:
 - 📈 **My Progress** — XP, levels, study streak, per-course progress, topic-mastery radar, learning path, recommendations, experiment history.
 - 👩‍🏫 **Instructor dashboard** — classrooms with join codes, all-courses or per-course mastery heatmaps, weak-topic alerts, sortable student table, assignments from any course with completion tracking, one-click demo class.
 - 📝 **Study theme** — warm "notebook paper" light theme with highlighter accents, sticky notes and chalkboard panels for 3D/simulations, plus a **night-study dark mode**. Responsive down to phones.
+
+### 🆕 New in v2.3 — a full curriculum + career roadmaps
+
+- **137 lessons across 8 courses** — every course now runs from the absolute basics to advanced topics (**15–20 lessons each**), with formulas, quizzes and "try it in the lab" links throughout.
+- **Career roadmaps** — each course ends with a **"Where this takes you"** section: the roles you can grow into (with demand indicators), a four-stage learning ladder, projects to build, and which course to take next.
+- **190+ glossary terms & 450+ spaced-repetition flashcards**, generated from the expanded knowledge base.
+
+![Career roadmap](docs/screenshots/roadmap.png)
 
 ### 🆕 New in v2.2 — four new courses and neon labs
 
@@ -85,6 +93,8 @@ Plus, across all courses:
 | ![chain](docs/screenshots/chain-3d.png) | ![cipher](docs/screenshots/cyber-ciphers.png) |
 | **Dream machine (Deep learning)** | **Quantum walk (Quantum)** |
 | ![dream](docs/screenshots/dl-dream.png) | ![walk](docs/screenshots/quantum-walk.png) |
+| **Career roadmap (every course)** | **15–20 lessons per course** |
+| ![roadmap](docs/screenshots/roadmap.png) | ![lessons](docs/screenshots/lessons-path.png) |
 
 | **Living sky — time of day, weather and moods** | |
 | ![living sky](docs/screenshots/living-sky.png) | |
@@ -138,6 +148,7 @@ docker compose up --build
 ```bash
 pip install -r requirements-dev.txt
 pytest          # 116 tests: simulators, all course engines, content integrity, API, spaced repetition, offline app shell
+                # 8 courses · 137 lessons · 37 labs · career roadmaps
 ```
 
 ## 🏗️ Architecture
@@ -169,7 +180,7 @@ q3d-learn/
 ├── app/
 │   ├── main.py · config.py · database.py · schemas.py
 │   ├── api/            learning.py · quantum.py · labs.py · community.py · study.py
-│   ├── courses/        registry.py + quantum/ · ml/ · ds/ · ai/ · dsa/ · cyber/ · chain/ · dl/  (content.py + engine.py each)
+│   ├── courses/        registry.py + roadmaps.py + quantum/ · ml/ · ds/ · ai/ · dsa/ · cyber/ · chain/ · dl/  (content.py + extra.py lessons + engine.py + more_labs.py)
 │   ├── quantum/        gates · simulator · analysis · validation · qasm · qiskit_runner · algorithms · walk
 │   ├── ai/tutor.py     LLM providers + grounding + offline tutor
 │   └── services/       progress.py (analytics) · study.py (flashcards, SM-2, glossary) · demo.py

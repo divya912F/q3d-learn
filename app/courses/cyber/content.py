@@ -20,6 +20,10 @@ COURSE = {
          "description": "Change one character and watch half of a SHA-256 hash flip; test how long a password would survive."},
         {"id": "rsa", "title": "RSA & Key-Exchange Workshop", "icon": "lock",
          "description": "Pick two primes, derive the keys, encrypt and sign — and mix secret colours with Diffie–Hellman."},
+        {"id": "firewall", "title": "Firewall & IDS", "icon": "wall",
+         "description": "Write first-match rules, replay live traffic against a glowing wall and catch port scans with intrusion detection."},
+        {"id": "phishing", "title": "Phishing Spotter", "icon": "alert",
+         "description": "Judge fictional emails, reveal the warning signs and dissect any link to find who really owns it."},
     ],
     "topics": {
         "basics": "Security basics", "classical": "Classical ciphers", "symmetric": "Symmetric crypto", "hashing": "Hashing & passwords",
@@ -235,3 +239,10 @@ KNOWLEDGE = {
     "mfa": {"keys": ["2fa", "mfa", "two-factor", "multi-factor", "authenticator", "backup", "ransomware", "least privilege", "patch"], "lesson": "cy-defense",
             "text": "**Multi-factor authentication** (password + phone/security key) stops most account takeovers. Add fast patching, 3-2-1 backups against ransomware and least-privilege access."},
 }
+
+# --- v2.3 expanded curriculum (see extra.py) ---
+from .extra import KNOWLEDGE_EXTRA, LESSONS_EXTRA, TOPICS_EXTRA  # noqa: E402
+
+COURSE["topics"].update(TOPICS_EXTRA)
+LESSONS = LESSONS + LESSONS_EXTRA
+KNOWLEDGE.update(KNOWLEDGE_EXTRA)

@@ -132,3 +132,34 @@ export function label(ctx, text, x, y, { color = 'rgba(220,230,255,.85)', size =
   ctx.fillText(text, x, y);
   ctx.restore();
 }
+
+/** Project a 3-D point with yaw/pitch rotation into canvas space → [x, y, depth]. */
+export function project([x, y, z], { yaw = 0, pitch = 0, scale = 100, cx = 0, cy = 0, persp = 3.2 } = {}) {
+  const cy1 = Math.cos(yaw), sy1 = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+  const x1 = x * cy1 - z * sy1, z1 = x * sy1 + z * cy1;
+  const y2 = y * cp - z1 * sp, z2 = y * sp + z1 * cp;
+  const k = persp / (persp + z2);
+  return [cx + x1 * scale * k, cy - y2 * scale * k, z2];
+}
+
+/** Drag-to-orbit on a canvas. view = {yaw, pitch}; onChange() is called while dragging. Returns detach(). */
+export function orbit(canvas, view, onChange = () => {}) {
+  let drag = null;
+  const down = (e) => { drag = [e.clientX, e.clientY]; view.dragging = true; canvas.setPointerCapture?.(e.pointerId); };
+  const move = (e) => {
+    if (!drag) return;
+    view.yaw += (e.clientX - drag[0]) * 0.01;
+    view.pitch = clamp(view.pitch + (e.clientY - drag[1]) * 0.01, -1.4, 1.4);
+    drag = [e.clientX, e.clientY];
+    onChange();
+  };
+  const up = () => { drag = null; view.dragging = false; };
+  canvas.style.cursor = 'grab';
+  canvas.addEventListener('pointerdown', down);
+  canvas.addEventListener('pointermove', move);
+  window.addEventListener('pointerup', up);
+  return () => { canvas.removeEventListener('pointerdown', down); canvas.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+}
+
+/** Rainbow-ish neon hue for index i of n. */
+export const hue = (i, n, s = 95, l = 62, a = 1) => `hsla(${Math.round((i / Math.max(1, n)) * 300 + 190) % 360},${s}%,${l}%,${a})`;

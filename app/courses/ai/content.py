@@ -22,6 +22,10 @@ COURSE = {
          "description": "Train an agent by trial and error; watch values and the policy appear over episodes."},
         {"id": "nlp", "title": "Next-Word Predictor", "icon": "chat",
          "description": "Build an n-gram language model and sample text with a temperature dial — how LLMs pick words."},
+        {"id": "genetic", "title": "Genetic Algorithm", "icon": "dna",
+         "description": "Evolve the shortest delivery route generation by generation with crossover, mutation and survival of the fittest."},
+        {"id": "nqueens", "title": "N-Queens Solver", "icon": "crown",
+         "description": "Watch brute force, backtracking and forward checking place queens — and count how many dead ends each avoids."},
     ],
     "topics": {
         "agents": "Agents", "search": "Search", "heuristics": "Heuristics", "games": "Game playing",
@@ -247,3 +251,10 @@ KNOWLEDGE = {
     "ethics": {"keys": ["ethic", "bias", "fair", "privacy", "transparen", "responsible"], "lesson": "ai-ethics",
                "text": "**Responsible AI** covers fairness (equal performance across groups), privacy, transparency (explaining decisions), accountability and safety. Biased data produces biased models, so evaluate per group."},
 }
+
+# --- v2.3 expanded curriculum (see extra.py) ---
+from .extra import KNOWLEDGE_EXTRA, LESSONS_EXTRA, TOPICS_EXTRA  # noqa: E402
+
+COURSE["topics"].update(TOPICS_EXTRA)
+LESSONS = LESSONS + LESSONS_EXTRA
+KNOWLEDGE.update(KNOWLEDGE_EXTRA)

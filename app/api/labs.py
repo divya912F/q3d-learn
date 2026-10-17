@@ -22,6 +22,14 @@ from ..courses.dl import engine as dl
 from ..courses.ds import engine as ds
 from ..courses.dsa import engine as dsa
 from ..courses.ml import engine as ml
+from ..courses.ai import more_labs as ai2
+from ..courses.chain import more_labs as chain2
+from ..courses.cyber import more_labs as cyber2
+from ..courses.dl import more_labs as dl2
+from ..courses.ds import more_labs as ds2
+from ..courses.dsa import more_labs as dsa2
+from ..courses.ml import more_labs as ml2
+from ..quantum.optics import chsh_test, mach_zehnder
 from ..quantum.walk import quantum_walk
 from ..database import Experiment, User, get_session
 
@@ -257,3 +265,38 @@ async def dl_dream(req: LabRequest, db: Session = Depends(get_session)):
     res = await _run(dl.dream_lab, req.config)
     _log(db, req.user_id, "dl", "dream", f"L{res['layer']} c{res['channel']}")
     return res
+
+
+# ------------------------------------------------------------------------------- v2.3 labs
+# (path, engine, course, lab id, summary) — one generic endpoint per lab keeps the router small.
+_V23 = [
+    ("quantum/interference", mach_zehnder, "quantum", "interference", lambda r: f"φ={r['phase']} which-path={r['which_path']}"),
+    ("quantum/chsh", chsh_test, "quantum", "chsh", lambda r: f"S={r['S_sampled']}"),
+    ("ml/pca", ml2.pca_explore, "ml", "pca", lambda r: f"{r['dataset']} k={r['k']}"),
+    ("ml/metrics", ml2.classifier_scores, "ml", "metrics", lambda r: f"AUC {r['auc']}"),
+    ("ds/abtest", ds2.ab_test, "ds", "abtest", lambda r: f"p={r['p_value']}"),
+    ("ds/timeseries", ds2.time_series, "ds", "timeseries", lambda r: f"{r['series']} · {r['method']} MAE {r['mae']}"),
+    ("ai/genetic", ai2.genetic_tsp, "ai", "genetic", lambda r: f"{r['n']} cities · {r['best_length']}"),
+    ("ai/nqueens", ai2.n_queens, "ai", "nqueens", lambda r: f"N={r['n']} {r['method']} · {r['nodes']} nodes"),
+    ("dsa/dp", dsa2.dp_table, "dsa", "dp", lambda r: r["problem"]),
+    ("dsa/recursion", dsa2.recursion_tree, "dsa", "recursion", lambda r: f"{r['problem']}({r['n']}) · {r['calls']} calls"),
+    ("cyber/firewall", cyber2.firewall_sim, "cyber", "firewall", lambda r: f"{r['preset']} · score {r['score']}"),
+    ("cyber/phishing", cyber2.phishing_check, "cyber", "phishing", lambda r: f"risk {r['risk']}"),
+    ("chain/ecc", chain2.ecc_lab, "chain", "ecc", lambda r: f"{r['curve']} curve"),
+    ("chain/contract", chain2.contract_sim, "chain", "contract", lambda r: r["scenario"]),
+    ("dl/diffusion", dl2.diffusion, "dl", "diffusion", lambda r: f"{r['shape']} · {r['sampler']}"),
+    ("dl/embeddings", dl2.embeddings, "dl", "embeddings", lambda r: r["selected"]),
+]
+
+
+def _make(fn, course, lab, summary):
+    async def endpoint(req: LabRequest, db: Session = Depends(get_session)):
+        res = await _run(fn, req.config)
+        _log(db, req.user_id, course, lab, summary(res))
+        return res
+    endpoint.__name__ = f"{course}_{lab}"
+    return endpoint
+
+
+for _path, _fn, _course, _lab, _summary in _V23:
+    router.add_api_route(f"/{_path}", _make(_fn, _course, _lab, _summary), methods=["POST"], name=f"{_course}_{_lab}")

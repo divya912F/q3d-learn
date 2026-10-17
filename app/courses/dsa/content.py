@@ -20,6 +20,10 @@ COURSE = {
          "description": "Watch BFS ripple outward, Dijkstra relax edges and Prim/Kruskal grow a minimum spanning tree."},
         {"id": "trees", "title": "Tree Garden", "icon": "tree",
          "description": "Insert into a BST or an AVL tree and watch rotations keep it balanced; replay every traversal."},
+        {"id": "dp", "title": "DP Table Builder", "icon": "table",
+         "description": "Fill a dynamic-programming table cell by cell, then trace back the answer — LCS, edit distance, knapsack, coin change."},
+        {"id": "recursion", "title": "Recursion Tree", "icon": "tree",
+         "description": "See calls branch and return; switch on memoisation and watch an exponential tree collapse."},
     ],
     "topics": {
         "complexity": "Big-O", "linear": "Arrays, stacks & queues", "sorting": "Sorting", "recursion": "Divide & conquer",
@@ -234,3 +238,10 @@ KNOWLEDGE = {
     "hash-table": {"keys": ["hash table", "hashmap", "hash map", "collision", "load factor", "hashing"], "lesson": "dsa-hashing",
                    "text": "A **hash table** maps keys to buckets with a hash function for O(1) average lookups. Collisions are handled by chaining or probing; Java's `HashMap` resizes when the load factor exceeds 0.75."},
 }
+
+# --- v2.3 expanded curriculum (see extra.py) ---
+from .extra import KNOWLEDGE_EXTRA, LESSONS_EXTRA, TOPICS_EXTRA  # noqa: E402
+
+COURSE["topics"].update(TOPICS_EXTRA)
+LESSONS = LESSONS + LESSONS_EXTRA
+KNOWLEDGE.update(KNOWLEDGE_EXTRA)

@@ -24,6 +24,10 @@ COURSE = {
          "description": "Build a step-by-step cleaning pipeline and watch missing values, duplicates and outliers disappear."},
         {"id": "stats", "title": "Probability Lab", "icon": "dice",
          "description": "Sample from distributions and see the Central Limit Theorem turn any shape into a bell curve."},
+        {"id": "abtest", "title": "A/B Test Studio", "icon": "users",
+         "description": "Run an experiment, read the p-value and confidence interval, and see how “peeking” inflates false positives."},
+        {"id": "timeseries", "title": "Time-Series Studio", "icon": "trend",
+         "description": "Split a series into trend, season and noise, read a seasonal clock, and forecast the hidden future."},
     ],
     "topics": {
         "lifecycle": "Data lifecycle", "statistics": "Statistics", "visualization": "Visualisation",
@@ -260,3 +264,10 @@ KNOWLEDGE = {
     "clt": {"keys": ["central limit", "clt", "standard error", "sample mean", "sampling"], "lesson": "ds-probability",
             "text": "The **Central Limit Theorem**: means of n independent samples are approximately normal with standard error σ/√n, whatever the original distribution."},
 }
+
+# --- v2.3 expanded curriculum (see extra.py) ---
+from .extra import KNOWLEDGE_EXTRA, LESSONS_EXTRA, TOPICS_EXTRA  # noqa: E402
+
+COURSE["topics"].update(TOPICS_EXTRA)
+LESSONS = LESSONS + LESSONS_EXTRA
+KNOWLEDGE.update(KNOWLEDGE_EXTRA)

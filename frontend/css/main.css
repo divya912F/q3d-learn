@@ -1104,3 +1104,44 @@ body:has(.focus-pill) .toasts { bottom: 84px; }
 .zoo-cell span { background: rgba(0,0,0,.55); border-radius: 6px; padding: 0 5px; }
 @media (max-width: 1080px) { .cipher-top { grid-template-columns: 1fr; } }
 @media (max-width: 700px) { .hash-grids { grid-template-columns: 1fr 1fr; } .chain-stage { height: 280px; } .walk-stage { height: 320px; } }
+
+/* ---- v2.3 lab widgets ---- */
+.code-mini { background: rgba(10,12,24,.6); border-radius: 8px; padding: 8px 10px; overflow:auto; font-family: ui-monospace, "SF Mono", Menlo, monospace; color: #c5cbf0; line-height: 1.45; }
+.fw-rule { display: grid; grid-template-columns: 1fr 1fr 1.2fr 1.6fr auto auto auto; gap: 5px; align-items: center; padding: 5px; border-radius: 8px; background: rgba(255,255,255,.04); border-left: 3px solid var(--text-3); }
+.fw-rule.allow { border-left-color: var(--green); } .fw-rule.deny { border-left-color: var(--red); }
+.fw-rule .input { padding: 4px 6px; font-size: 12px; } .fw-rule .icon-btn { width: 26px; height: 26px; }
+@media (max-width: 720px){ .fw-rule { grid-template-columns: 1fr 1fr; } }
+.phish-mail { line-height: 1.55; } .phish-head { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px; font-size: .92rem; }
+.phish-head > div { padding: 2px 4px; border-radius: 4px; } .phish-flag { background: rgba(240,101,149,.14); outline: 1px dashed rgba(240,101,149,.6); }
+.phish-link { color: var(--blue); text-decoration: underline; } .phish-hit { background: rgba(255,212,59,.3); border-radius: 3px; padding: 0 2px; color: inherit; }
+.phish-signal { padding: 7px 9px; border-radius: 8px; background: rgba(255,107,107,.08); border-left: 3px solid var(--red); }
+.inbox-item { display:block; width:100%; text-align:left; padding: 7px 9px; border-radius: 8px; background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--text); cursor: pointer; font-size: .86rem; }
+.inbox-item.active { border-color: var(--course); box-shadow: 0 0 0 1px var(--course); } .inbox-item:hover { background: rgba(255,255,255,.07); }
+.url-parts { font-family: ui-monospace, Menlo, monospace; font-size: 1.05rem; word-break: break-all; padding: 10px; background: rgba(10,12,24,.5); border-radius: 8px; }
+.up-scheme { color: var(--text-3); } .up-sub { color: var(--red); } .up-reg { color: var(--green); font-weight: 800; background: rgba(105,230,190,.15); padding: 1px 3px; border-radius: 4px; } .up-path { color: var(--text-3); }
+.zoo-cell.ready, .sqli-app { background: rgba(255,255,255,.03); }
+
+/* ---------------- Career roadmap (course page) ---------------- */
+.roadmap { margin-top: 40px; }
+.roadmap .rm-h { font-size: 1rem; margin: 22px 0 12px; color: var(--text-2); font-weight: 650; }
+.rm-role { padding: 16px; border-top: 3px solid var(--course); display: flex; flex-direction: column; gap: 8px; }
+.rm-role b { font-size: 1.02rem; }
+.rm-role p { margin: 0; color: var(--text-2); font-size: .9rem; line-height: 1.45; flex: 1; }
+.rm-band { width: 10px; height: 10px; border-radius: 50%; flex: none; margin-top: 4px; background: var(--text-3); box-shadow: 0 0 0 3px color-mix(in srgb, var(--text-3) 18%, transparent); }
+.rm-band.high { background: var(--green); box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 20%, transparent); }
+.rm-band.mid { background: var(--amber); box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 20%, transparent); }
+.rm-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.rm-tag { font-size: .72rem; padding: 3px 8px; border-radius: 999px; background: color-mix(in srgb, var(--course) 12%, transparent); color: color-mix(in srgb, var(--course) 72%, var(--text)); font-weight: 600; }
+.rm-ladder { display: grid; gap: 0; }
+.rm-step { display: grid; grid-template-columns: 44px 1fr; gap: 14px; position: relative; padding-bottom: 18px; }
+.rm-step:not(:last-child)::before { content: ""; position: absolute; left: 21px; top: 36px; bottom: -2px; width: 2px; background: linear-gradient(var(--course), color-mix(in srgb, var(--course) 25%, transparent)); opacity: .5; }
+.rm-node { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; background: var(--course); box-shadow: 0 6px 18px color-mix(in srgb, var(--course) 35%, transparent); z-index: 1; }
+.rm-step-body { padding-top: 2px; }
+.rm-step-body b { font-size: 1.02rem; }
+.rm-step-body p { margin: 3px 0 8px; color: var(--text-2); font-size: .9rem; }
+.rm-lessons { display: flex; flex-wrap: wrap; gap: 6px; }
+.rm-lessons a { font-size: .78rem; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-2); text-decoration: none; transition: .15s; }
+.rm-lessons a:hover { border-color: var(--course); color: var(--course); background: color-mix(in srgb, var(--course) 8%, transparent); }
+.rm-build ul { margin: 2px 0 0; padding-left: 18px; }
+.rm-build li { margin: 7px 0; color: var(--text-2); font-size: .92rem; }
+.rm-build li::marker { color: var(--course); }

@@ -20,6 +20,10 @@ COURSE = {
          "description": "Hash transactions up to a single root, prove one payment with a few hashes, and catch tampering."},
         {"id": "attack", "title": "51% Attack Race", "icon": "trend",
          "description": "Race an attacker's secret chain against honest miners and see why merchants wait for confirmations."},
+        {"id": "ecc", "title": "Elliptic-Curve Keys", "icon": "key",
+         "description": "The dots behind every wallet: add points, build a key, sign a message — and see how reusing a nonce leaks the key."},
+        {"id": "contract", "title": "Smart-Contract Lab", "icon": "code",
+         "description": "Run a token contract call by call, or watch the re-entrancy bug drain a bank until you apply the fix."},
     ],
     "topics": {
         "ledger": "Distributed ledgers", "hashing": "Hash pointers", "pow": "Proof of work", "merkle": "Merkle trees",
@@ -204,3 +208,10 @@ KNOWLEDGE = {
     "smart-contract": {"keys": ["smart contract", "ethereum", "solidity", "dapp", "oracle", "nft", "defi"], "lesson": "bc-contracts",
                        "text": "A **smart contract** is code stored and executed on a blockchain such as Ethereum. It runs exactly as written and is public and immutable — great for transparent rules, risky for bugs. Contracts need **oracles** for real-world data."},
 }
+
+# --- v2.3 expanded curriculum (see extra.py) ---
+from .extra import KNOWLEDGE_EXTRA, LESSONS_EXTRA, TOPICS_EXTRA  # noqa: E402
+
+COURSE["topics"].update(TOPICS_EXTRA)
+LESSONS = LESSONS + LESSONS_EXTRA
+KNOWLEDGE.update(KNOWLEDGE_EXTRA)

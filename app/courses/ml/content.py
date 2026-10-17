@@ -20,6 +20,10 @@ COURSE = {
          "description": "Train logistic regression, k-NN, decision trees or a neural network and see the decision boundary form."},
         {"id": "kmeans", "title": "k-Means Clustering", "icon": "target",
          "description": "Step through assign/update iterations and find the best k with the elbow and silhouette plots."},
+        {"id": "pca", "title": "PCA Explorer", "icon": "sphere",
+         "description": "Rotate a 3-D cloud, see its principal axes, then flatten it to fewer dimensions and measure what is lost."},
+        {"id": "metrics", "title": "Threshold & ROC", "icon": "target",
+         "description": "Drag the decision threshold and watch precision, recall, the confusion matrix and the ROC/PR curves move."},
     ],
     "topics": {
         "foundations": "Foundations", "regression": "Regression", "classification": "Classification", "trees": "Decision trees",
@@ -274,3 +278,10 @@ KNOWLEDGE = {
     "metrics": {"keys": ["accuracy", "precision", "recall", "confusion", "f1"], "lesson": "ml-evaluation",
                 "text": "The **confusion matrix** counts true/false positives and negatives. **Precision** = TP/(TP+FP), **recall** = TP/(TP+FN). Accuracy alone can mislead when classes are imbalanced."},
 }
+
+# --- v2.3 expanded curriculum (see extra.py) ---
+from .extra import KNOWLEDGE_EXTRA, LESSONS_EXTRA, TOPICS_EXTRA  # noqa: E402
+
+COURSE["topics"].update(TOPICS_EXTRA)
+LESSONS = LESSONS + LESSONS_EXTRA
+KNOWLEDGE.update(KNOWLEDGE_EXTRA)

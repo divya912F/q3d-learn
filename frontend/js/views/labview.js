@@ -4,14 +4,14 @@ import { esc, icon, hydrateIcons } from '../ui.js';
 import { openDrawer, takeLabPreset } from '../main.js';
 
 export const LAB_MODULES = {
-  ml: { regression: () => import('../labs/ml-regression.js'), classifier: () => import('../labs/ml-classifier.js'), kmeans: () => import('../labs/ml-kmeans.js') },
-  ds: { explorer: () => import('../labs/ds-explorer.js'), pipeline: () => import('../labs/ds-pipeline.js'), stats: () => import('../labs/ds-stats.js') },
-  ai: { search: () => import('../labs/ai-search.js'), minimax: () => import('../labs/ai-minimax.js'), rl: () => import('../labs/ai-rl.js'), nlp: () => import('../labs/ai-nlp.js') },
-  quantum: { walk: () => import('../labs/q-walk.js') },
-  dsa: { sorting: () => import('../labs/dsa-sorting.js'), graphs: () => import('../labs/dsa-graphs.js'), trees: () => import('../labs/dsa-trees.js') },
-  cyber: { ciphers: () => import('../labs/cy-ciphers.js'), hashing: () => import('../labs/cy-hashing.js'), rsa: () => import('../labs/cy-rsa.js') },
-  chain: { ledger: () => import('../labs/bc-ledger.js'), merkle: () => import('../labs/bc-merkle.js'), attack: () => import('../labs/bc-attack.js') },
-  dl: { conv: () => import('../labs/dl-conv.js'), attention: () => import('../labs/dl-attention.js'), dream: () => import('../labs/dl-dream.js') },
+  ml: { regression: () => import('../labs/ml-regression.js'), classifier: () => import('../labs/ml-classifier.js'), kmeans: () => import('../labs/ml-kmeans.js'), pca: () => import('../labs/ml-pca.js'), metrics: () => import('../labs/ml-metrics.js') },
+  ds: { explorer: () => import('../labs/ds-explorer.js'), pipeline: () => import('../labs/ds-pipeline.js'), stats: () => import('../labs/ds-stats.js'), abtest: () => import('../labs/ds-abtest.js'), timeseries: () => import('../labs/ds-timeseries.js') },
+  ai: { search: () => import('../labs/ai-search.js'), minimax: () => import('../labs/ai-minimax.js'), rl: () => import('../labs/ai-rl.js'), nlp: () => import('../labs/ai-nlp.js'), genetic: () => import('../labs/ai-genetic.js'), nqueens: () => import('../labs/ai-nqueens.js') },
+  quantum: { walk: () => import('../labs/q-walk.js'), interference: () => import('../labs/q-interference.js'), chsh: () => import('../labs/q-chsh.js') },
+  dsa: { sorting: () => import('../labs/dsa-sorting.js'), graphs: () => import('../labs/dsa-graphs.js'), trees: () => import('../labs/dsa-trees.js'), dp: () => import('../labs/dsa-dp.js'), recursion: () => import('../labs/dsa-recursion.js') },
+  cyber: { ciphers: () => import('../labs/cy-ciphers.js'), hashing: () => import('../labs/cy-hashing.js'), rsa: () => import('../labs/cy-rsa.js'), firewall: () => import('../labs/cy-firewall.js'), phishing: () => import('../labs/cy-phishing.js') },
+  chain: { ledger: () => import('../labs/bc-ledger.js'), merkle: () => import('../labs/bc-merkle.js'), attack: () => import('../labs/bc-attack.js'), ecc: () => import('../labs/bc-ecc.js'), contract: () => import('../labs/bc-contract.js') },
+  dl: { conv: () => import('../labs/dl-conv.js'), attention: () => import('../labs/dl-attention.js'), dream: () => import('../labs/dl-dream.js'), diffusion: () => import('../labs/dl-diffusion.js'), embeddings: () => import('../labs/dl-embeddings.js') },
 };
 
 export async function render(root, { params, course }) {

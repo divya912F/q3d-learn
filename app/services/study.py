@@ -153,6 +153,15 @@ TERMS: dict[str, tuple[str, list[str]]] = {
     "generative": ("Generative models", ["diffusion models", "gans"]),
 }
 
+# v2.3: glossary display names from each course's expanded curriculum (extra.py).
+# Picked up automatically for every course that ships an extra.py with TERMS_EXTRA.
+for _cid in ("quantum", "ml", "ds", "ai", "dsa", "cyber", "chain", "dl"):
+    try:
+        _ex = __import__(f"app.courses.{_cid}.extra", fromlist=["TERMS_EXTRA"])
+    except ModuleNotFoundError:
+        continue
+    TERMS.update(getattr(_ex, "TERMS_EXTRA", {}))
+
 
 def _plain(md: str) -> str:
     return re.sub(r"\*\*?([^*]+)\*\*?", r"\1", md).strip()
