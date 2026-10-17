@@ -99,6 +99,17 @@ def test_reviews_count_towards_xp_and_activity(client, user):
     assert p["activity"][-1]["count"] >= 2
 
 
+def test_memory_map(client, user):
+    uid = user["id"]
+    mem = client.get(f"/api/review/{uid}/memory").json()
+    assert [c["course"] for c in mem["courses"]] == list(R.ORDER)
+    assert set(mem["totals"]) >= {"mastered", "practice", "forgetting", "new", "due"}
+    # every course reports topic buckets and a 0–100 score
+    for c in mem["courses"]:
+        assert c["topics"] and 0 <= c["score"] <= 100
+        assert c["counts"]["mastered"] + c["counts"]["practice"] + c["counts"]["forgetting"] + c["counts"]["new"] == c["total"]
+
+
 def test_focus_sessions(client, user):
     uid = user["id"]
     s = client.post("/api/focus", json={"user_id": uid, "minutes": 25, "course": "ml", "label": "Gradient descent"}).json()

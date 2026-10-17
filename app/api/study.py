@@ -128,6 +128,63 @@ def review_stats(uid: int, course: str | None = None, db: Session = Depends(get_
     return _review_stats(db, uid, _course_or_none(course))
 
 
+def _memory_status(row: ReviewCard | None, now: datetime) -> str:
+    """Traffic-light memory state for one concept."""
+    if row is None:
+        return "new"                       # never studied (grey)
+    if _aware(row.due) <= now:
+        return "forgetting"                # due now — most likely to be forgotten (red)
+    if row.interval >= 21:
+        return "mastered"                  # long, stable interval (green)
+    return "practice"                      # learned but still young (yellow)
+
+
+@router.get("/review/{uid}/memory")
+def memory_map(uid: int, db: Session = Depends(get_session)) -> dict:
+    """Memory Radar: per-course / per-topic retention (mastered / practice / forgetting / new),
+    plus the exact concepts to revise today."""
+    _user(db, uid)
+    now = S.now_utc()
+    rows = {r.card_id: r for r in db.scalars(select(ReviewCard).where(ReviewCard.user_id == uid)).all()}
+    courses, totals, revise = [], {"mastered": 0, "practice": 0, "forgetting": 0, "new": 0}, []
+    for cid in R.ORDER:
+        meta = R.course(cid)
+        topic_labels = R.topics(cid)
+        by_topic: dict[str, list[dict]] = {}
+        cc = {"mastered": 0, "practice": 0, "forgetting": 0, "new": 0}
+        for card in (c for c in S.deck() if c["course"] == cid):
+            status = _memory_status(rows.get(card["id"]), now)
+            cc[status] += 1
+            totals[status] += 1
+            t = card.get("topic") or "general"
+            by_topic.setdefault(t, []).append({"id": card["id"], "front": card["front"], "status": status, "kind": card["kind"]})
+            if status == "forgetting":
+                revise.append({"id": card["id"], "front": card["front"], "course": cid, "topic": topic_labels.get(t, t)})
+        topics = []
+        for t, items in by_topic.items():
+            n = {"mastered": 0, "practice": 0, "forgetting": 0, "new": 0}
+            for it in items:
+                n[it["status"]] += 1
+            # a topic's colour: red if anything is being forgotten, green if all mastered, grey if untouched, else yellow
+            if n["forgetting"]:
+                status = "forgetting"
+            elif n["new"] == len(items):
+                status = "new"
+            elif n["mastered"] == len(items):
+                status = "mastered"
+            else:
+                status = "practice"
+            seen = len(items) - n["new"]
+            score = round(100 * (n["mastered"] + 0.5 * n["practice"]) / len(items)) if items else 0
+            topics.append({"topic": t, "label": topic_labels.get(t, t.title()), "status": status,
+                           "score": score, "seen": seen, "total": len(items), "counts": n})
+        total = sum(cc.values())
+        courses.append({"course": cid, "title": meta["title"], "short": meta["short"], "counts": cc,
+                        "total": total, "topics": topics,
+                        "score": round(100 * (cc["mastered"] + 0.5 * cc["practice"]) / total) if total else 0})
+    return {"courses": courses, "totals": {**totals, "due": len(revise)}, "revise_today": revise[:40]}
+
+
 # ------------------------------------------------------------------ focus sessions
 class FocusBody(BaseModel):
     user_id: int

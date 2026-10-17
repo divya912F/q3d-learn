@@ -72,6 +72,7 @@ export const api = {
   dueCards: (uid, course, limit = 20) => request('GET', `/api/review/${uid}/due?limit=${limit}${course ? `&course=${course}` : ''}`),
   gradeCard: (uid, card_id, grade) => request('POST', `/api/review/${uid}/grade`, { card_id, grade }),
   reviewStats: (uid, course) => request('GET', `/api/review/${uid}/stats${course ? `?course=${course}` : ''}`),
+  memoryMap: (uid) => request('GET', `/api/review/${uid}/memory`),
   logFocus: (body) => request('POST', '/api/focus', body),
   focus: (uid) => request('GET', `/api/focus/${uid}`),
   notes: (uid) => request('GET', `/api/notes/${uid}`),

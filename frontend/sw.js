@@ -1,7 +1,7 @@
 // Q-3D Learn service worker: installable, offline-capable study desk.
 // App shell -> cache first (refreshed in the background); API GETs -> network first with an offline fallback.
 // Bump VERSION whenever the shell list changes (tests/test_pwa.py checks the list is complete).
-const VERSION = 'q3d-v2.3.1';
+const VERSION = 'q3d-v2.3.2';
 const SHELL = [
   './',
   'index.html',
@@ -91,6 +91,7 @@ const SHELL = [
   'js/views/learn.js',
   'js/views/notes.js',
   'js/views/progress.js',
+  'js/views/radar.js',
   'js/views/review.js',
   'js/views/tutor.js',
 ];
@@ -124,6 +125,8 @@ self.addEventListener('fetch', (e) => {
       if (res.ok || res.type === 'opaque') { const copy = res.clone(); caches.open(VERSION).then((c) => c.put(req, copy)); }
       return res;
     }).catch(() => hit || (req.mode === 'navigate' ? caches.match('index.html') : undefined));
-    return hit || net;
+    // Our own app code (HTML/JS/CSS) is network-first, so new versions always load when online;
+    // the cache is only the offline fallback. Versioned CDN assets stay cache-first.
+    return cdn ? (hit || net) : net;
   }));
 });

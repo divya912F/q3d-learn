@@ -64,6 +64,7 @@ function resolve() {
     review: ['Review cards', () => import('./views/review.js')],
     glossary: ['Glossary', () => import('./views/glossary.js')],
     brainmap: ['Brain Map', () => import('./views/brainmap.js')],
+    radar: ['Memory Radar', () => import('./views/radar.js')],
     notes: ['My notebook', () => import('./views/notes.js')],
     certificate: ['Certificate', () => import('./views/certificate.js')],
   };
@@ -141,6 +142,7 @@ function renderNav(r = resolve()) {
   html += link('#/review', 'cards', 'Review cards', r.key === 'review', '').replace('</span></a>', `</span>${store.dueCount ? `<span class="badge" title="cards due">${store.dueCount}</span>` : ''}</a>`);
   html += link('#/glossary', 'abc', 'Glossary', r.key === 'glossary');
   html += link('#/brainmap', 'mindmap', 'Brain Map', r.key === 'brainmap');
+  html += link('#/radar', 'radar', 'Memory Radar', r.key === 'radar');
   html += link('#/notes', 'notebook', 'My notebook', r.key === 'notes');
   html += link('#/tutor', 'bot', 'AI Tutor (Q-Bot)', r.key === 'tutor');
   html += link('#/progress', 'chart', 'My Progress', r.key === 'progress');
@@ -332,7 +334,13 @@ async function boot() {
   window.addEventListener('offline', () => { net(); toast('You are offline — lessons you opened before still work.', 'info', 5000); });
   net();
   if ('serviceWorker' in navigator && (location.protocol === 'https:' || ['localhost', '127.0.0.1'].includes(location.hostname))) {
-    navigator.serviceWorker.register('sw.js').catch(() => { /* optional */ });
+    // Reload once when a new service worker takes control, so a redeploy reaches the user
+    // without a manual hard-refresh (prevents stale cached code).
+    let swReloaded = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (swReloaded) return; swReloaded = true; location.reload();
+    });
+    navigator.serviceWorker.register('sw.js').then((reg) => { reg.update?.(); }).catch(() => { /* optional */ });
   }
 
   checkBackend();

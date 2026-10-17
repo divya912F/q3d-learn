@@ -9,6 +9,7 @@ export const meta = {
   howto: [
     'Pick how the input is arranged (random, reversed, nearly sorted, few unique values) and how many items.',
     'Press Race: all six algorithms replay their real comparisons and swaps at the same speed — the shortest trace wins.',
+    'Use the Speed slider to slow it right down (as slow as 1 step every 2 seconds) — the caption tells you what is happening at each step.',
     'The spotlight shows one algorithm in detail. Turn on sound to hear the values being compared.',
     'Read the growth chart: how comparisons scale as n doubles (log scale).',
   ],
@@ -18,7 +19,7 @@ const NAMES = { bubble: 'Bubble', insertion: 'Insertion', selection: 'Selection'
 const HUES = { bubble: '#ff6b9d', insertion: '#3bc9db', selection: '#fcc419', merge: '#69db7c', quick: '#b197fc', heap: '#ff922b' };
 
 export async function mount(root, { preset = {}, lock = [] } = {}) {
-  const st = { order: 'random', n: 32, algorithm: 'quick', speed: 1, sound: false, ...preset };
+  const st = { order: 'random', n: 16, algorithm: 'quick', speed: 0.5, sound: false, ...preset };
   root.innerHTML = `<div class="lab-grid">
     <div class="stack"><div class="card controls" data-ctl></div>
       <div class="row"><button class="btn btn-course grow" data-run>${icon('play')} Race!</button><button class="icon-btn" data-reset title="Restart">${icon('reset')}</button></div>
@@ -26,6 +27,7 @@ export async function mount(root, { preset = {}, lock = [] } = {}) {
     </div>
     <div class="stack" style="min-width:0">
       <div class="card board neon-card"><div class="card-head"><h3>${icon('sort')} Spotlight: <span data-spot-name></span></h3><div class="row" style="gap:6px" data-spot-stats></div></div>
+        <div class="sort-action" data-action>Press Race to watch it sort, one step at a time.</div>
         <div data-spot></div></div>
       <div class="card board neon-card"><div class="card-head"><h3>${icon('zap')} The race</h3><span class="faint tiny">same speed per step — fewer steps wins</span></div>
         <div class="race-grid" data-race></div></div>
@@ -129,6 +131,19 @@ export async function mount(root, { preset = {}, lock = [] } = {}) {
     sims.__spot = sim(run);
   }
 
+  function updateAction(ev) {
+    const el = $('[data-action]');
+    if (!el) return;
+    const s = sims.__spot;
+    if (!ev) { if (s?.finished) el.innerHTML = '✅ <b>Sorted!</b> Every value is now in order.'; return; }
+    const pos = (i) => `#${i + 1}`;
+    if (ev[0] === 'c') el.innerHTML = `🔍 Comparing <b>${s.a[ev[1]]}</b> and <b>${s.a[ev[2]]}</b> — which is smaller?`;
+    else if (ev[0] === 's') el.innerHTML = `🔁 Out of order — <b>swapping</b> the values at ${pos(ev[1])} and ${pos(ev[2])}.`;
+    else if (ev[0] === 'w') el.innerHTML = `✏️ Placing <b>${ev[2]}</b> into position ${pos(ev[1])}.`;
+    else if (ev[0] === 'p') el.innerHTML = `📌 Picked <b>${s.a[ev[1]]}</b> as the pivot to partition around.`;
+    else if (ev[0] === 'd') el.innerHTML = `🎯 Value at ${pos(ev[1])} is now in its final sorted place.`;
+  }
+
   function frame(t) {
     const dt = (t - clock) / 1000;
     clock = t;
@@ -137,14 +152,16 @@ export async function mount(root, { preset = {}, lock = [] } = {}) {
     const budget = Math.floor(acc);
     acc -= budget;
     let allDone = true;
+    let spotEv = null;
     for (const [a, s] of Object.entries(sims)) {
       for (let i = 0; i < budget && !s.finished; i++) {
         const ev = step(s);
-        if (a === '__spot' && ev && ev[0] === 'c' && i === 0) beep(s.a[ev[1]], Math.max(...s.run.values));
+        if (a === '__spot') { spotEv = ev; if (ev && ev[0] === 'c' && i === 0) beep(s.a[ev[1]], Math.max(...s.run.values)); }
       }
       if (s.finished && a !== '__spot' && !finishOrder.includes(a)) finishOrder.push(a);
       allDone &&= s.finished;
     }
+    if (budget > 0) updateAction(spotEv);
     drawBars(spot, sims.__spot, HUES[st.algorithm], true);
     for (const a of Object.keys(NAMES)) {
       const s = sims[a];
@@ -167,7 +184,7 @@ export async function mount(root, { preset = {}, lock = [] } = {}) {
     Object.keys(NAMES).forEach((a) => { lanes[a].plot.drawFn = () => drawBars(lanes[a].plot, sims[a], HUES[a]); });
     drawGrowth();
     clock = 0;
-    acc = 0;
+    acc = 1; // prime so the first step shows immediately, then the slow cadence
     if (reducedMotion()) {
       Object.values(sims).forEach((s) => { while (!s.finished) step(s); });
       finishOrder = [...data.runs].sort((a, b) => a.steps - b.steps).map((r) => r.algorithm);
@@ -218,7 +235,7 @@ export async function mount(root, { preset = {}, lock = [] } = {}) {
     $('[data-explain]').textContent = text[st.algorithm];
   }
   $('[data-run]').addEventListener('click', run);
-  $('[data-reset]').addEventListener('click', () => { if (data) { sims = Object.fromEntries(data.runs.map((r) => [r.algorithm, sim(r)])); finishOrder = []; acc = 0; spotlight(); stop?.(); clock = 0; stop = loop(frame); } });
+  $('[data-reset]').addEventListener('click', () => { if (data) { sims = Object.fromEntries(data.runs.map((r) => [r.algorithm, sim(r)])); finishOrder = []; acc = 1; spotlight(); stop?.(); clock = 0; stop = loop(frame); } });
   explain();
   await run();
   return {
