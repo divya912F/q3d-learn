@@ -7,6 +7,7 @@ import string
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.concurrency import run_in_threadpool
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from ..ai import tutor
@@ -99,7 +100,12 @@ def my_classrooms(instructor_id: int, db: Session = Depends(get_session)) -> lis
 
 @router.post("/classrooms/demo")
 def demo_classroom(instructor_id: int | None = None, db: Session = Depends(get_session)) -> dict:
-    code = seed_demo_classroom(db, instructor_id)
+    try:
+        code = seed_demo_classroom(db, instructor_id)
+    except IntegrityError:
+        # two "Load demo class" clicks can race to create DEMO42 — the loser just reuses it
+        db.rollback()
+        code = "DEMO42"
     room = db.scalar(select(Classroom).where(Classroom.code == code))
     return {"code": code, "name": room.name if room else code}
 

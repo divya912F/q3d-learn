@@ -1,7 +1,7 @@
 // Q-3D Learn service worker: installable, offline-capable study desk.
 // App shell -> cache first (refreshed in the background); API GETs -> network first with an offline fallback.
 // Bump VERSION whenever the shell list changes (tests/test_pwa.py checks the list is complete).
-const VERSION = 'q3d-v2.3.2';
+const VERSION = 'q3d-v2.3.3';
 const SHELL = [
   './',
   'index.html',

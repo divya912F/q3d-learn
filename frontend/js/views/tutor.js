@@ -8,7 +8,12 @@ const TOPICS = {
   ml: ['Gradient descent', 'Overfitting', 'Neural networks', 'Decision trees', 'k-means', 'Precision and recall'],
   ds: ['Median vs mean', 'Standard deviation', 'Correlation', 'Missing values', 'Outliers', 'Central limit theorem'],
   ai: ['A* search', 'BFS', 'Minimax', 'Q-learning', 'Temperature', 'Responsible AI'],
+  dsa: ['Big-O notation', 'Binary search', 'Quicksort', 'Hash tables', 'Dynamic programming', 'Dijkstra'],
+  cyber: ['The CIA triad', 'Caesar cipher', 'RSA', 'Hashing', 'Phishing', 'Multi-factor auth'],
+  chain: ['Proof of work', 'Merkle tree', 'Smart contracts', '51% attack', 'Public & private keys', 'Proof of stake'],
+  dl: ['Convolution', 'Backpropagation', 'Attention', 'Transformers', 'Embeddings', 'Diffusion models'],
 };
+const FALLBACK_TOPICS = ['Key concepts', 'Worked example', 'Common mistakes', 'How it is used'];
 
 export async function render(root) {
   const sys = store.system;
@@ -43,7 +48,7 @@ export async function render(root) {
       ctx.textContent = q.operations.length ? `Circuit (${q.num_qubits} qubits): ` + q.operations.map((o) => `${store.gates[o.name]?.label || o.name}${o.qubits.length ? ' q' + o.qubits.join(',q') : ''}`).join(' → ') : 'Empty circuit — build one in the Circuit Builder.';
     } else ctx.textContent = store.labContext ? `${store.labContext.title}:\n• ${store.labContext.facts.join('\n• ')}` : 'No lab result yet — run one of this course’s labs and Q-Bot will be able to explain it.';
     ctx.style.whiteSpace = 'pre-wrap';
-    root.querySelector('[data-topics]').innerHTML = TOPICS[c].map((t) => `<button class="chip" style="cursor:pointer;border:0">${esc(t)}</button>`).join('');
+    root.querySelector('[data-topics]').innerHTML = (TOPICS[c] || FALLBACK_TOPICS).map((t) => `<button class="chip" style="cursor:pointer;border:0">${esc(t)}</button>`).join('');
     root.querySelectorAll('[data-topics] button').forEach((b) => b.addEventListener('click', () => chat.ask(`What is ${b.textContent}? Explain simply with an example.`)));
   }
   root.querySelector('[data-course]').addEventListener('click', (e) => { const b = e.target.closest('[data-c]'); if (b) setCourse(b.dataset.c); });
